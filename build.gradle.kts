@@ -7,8 +7,8 @@ plugins {
     id("org.jetbrains.compose") version "1.1.1"
 }
 
-group = "me.meepo"
-version = "1.0"
+group = "ru.avem"
+version = "0.0001a"
 
 repositories {
     jcenter()
@@ -26,7 +26,7 @@ tasks.withType<KotlinCompile>() {
 
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "ru.avem.standconfigurator.MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "stand-configurator"
