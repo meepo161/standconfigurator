@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator
+package ru.avem.standconfigurator.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,12 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun Devices(onClick: (String) -> Unit) {
+fun Tests(onClick: (String) -> Unit) {
     val stateFlagList = mutableStateListOf<Boolean>()
     for (i in 0..50) {
         stateFlagList.add(false)
     }
-    val devicesState by rememberSaveable {
+    val testsState by rememberSaveable {
         mutableStateOf(stateFlagList)
     }
 
@@ -34,18 +34,18 @@ fun Devices(onClick: (String) -> Unit) {
             Box {
                 TextButton(
                     modifier = Modifier.fillMaxWidth().fillMaxHeight().fillMaxSize()
-                        .background(if (devicesState[it]) Color.Cyan else Color.White),
+                        .background(if (testsState[it]) Color.Cyan else Color.White),
                     onClick = {
                         for (i in 0..50) {
-                            devicesState[i] = false
+                            testsState[i] = false
                         }
-                        devicesState[it] = !devicesState[it]
-                        onClick("Прибор $it")
+                        testsState[it] = !testsState[it]
+                        onClick("Опыт $it")
                     }) {
                     Text(
                         modifier = Modifier
-                            .background(if (devicesState[it]) Color.Cyan else Color.White),
-                        text = "Прибор $it"
+                            .background(if (testsState[it]) Color.Cyan else Color.White),
+                        text = "Опыт $it"
                     )
                 }
             }
