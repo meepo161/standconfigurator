@@ -10,14 +10,17 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.HorizontalSplitPane
 import org.jetbrains.compose.splitpane.rememberSplitPaneState
+import java.awt.Cursor
 
 @OptIn(ExperimentalSplitPaneApi::class)
 @Composable
@@ -66,10 +69,15 @@ fun MainView() {
                                     Box(
                                         Modifier
                                             .markAsHandle()
-                                            .background(SolidColor(Color.Gray), alpha = 0.50f)
-                                            .width(9.dp)
-                                            .fillMaxHeight()
-                                    )
+                                            .cursorForHorizontalResize()
+                                            .width(16.dp)
+                                            .fillMaxHeight(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Box(Modifier.background(Color.Blue).width(1.dp).fillMaxHeight()) {
+
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -87,10 +95,15 @@ fun MainView() {
                             Box(
                                 Modifier
                                     .markAsHandle()
-                                    .background(SolidColor(Color.Gray), alpha = 0.50f)
-                                    .width(9.dp)
-                                    .fillMaxHeight()
-                            )
+                                    .cursorForHorizontalResize()
+                                    .width(16.dp)
+                                    .fillMaxHeight(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Box(Modifier.background(Color.Blue).width(1.dp).fillMaxHeight()) {
+
+                                }
+                            }
                         }
                     }
                 }
@@ -110,3 +123,7 @@ fun MainView() {
         )
     }
 }
+
+@OptIn(ExperimentalComposeUiApi::class)
+fun Modifier.cursorForHorizontalResize(): Modifier =
+    this.pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
