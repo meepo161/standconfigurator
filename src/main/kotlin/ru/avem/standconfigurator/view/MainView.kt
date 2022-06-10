@@ -3,42 +3,31 @@ package ru.avem.standconfigurator.view
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import java.awt.Cursor
+import ru.avem.standconfigurator.view.util.PanelState
+import ru.avem.standconfigurator.view.util.ResizablePanel
+import ru.avem.standconfigurator.view.util.VerticalSplittable
+import ru.avem.standconfigurator.view.util.VerticalSplittableRight
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 @Preview
 fun MainView() {
-    val checkedState by remember { mutableStateOf(true) }
     val stateFlagList = mutableStateListOf<Boolean>()
     for (i in 0..50) {
         stateFlagList.add(false)
@@ -48,12 +37,22 @@ fun MainView() {
     }
 
     val panelState = rememberSaveable { PanelState() }
+    val panelState2 = rememberSaveable { PanelState() }
 
     val animatedSize = if (panelState.splitter.isResizing) {
         if (panelState.isExpanded) panelState.expandedSize else panelState.collapsedSize
     } else {
         animateDpAsState(
             if (panelState.isExpanded) panelState.expandedSize else panelState.collapsedSize,
+            SpringSpec(stiffness = Spring.StiffnessLow)
+        ).value
+    }
+
+    val animatedSize2 = if (panelState2.splitter.isResizing) {
+        if (panelState2.isExpanded) panelState2.expandedSize else panelState2.collapsedSize
+    } else {
+        animateDpAsState(
+            if (panelState2.isExpanded) panelState2.expandedSize else panelState2.collapsedSize,
             SpringSpec(stiffness = Spring.StiffnessLow)
         ).value
     }
@@ -69,14 +68,6 @@ fun MainView() {
             },
 
             content = {
-
-
-//                Row(
-//                    modifier = Modifier.fillMaxSize().padding(bottom = 60.dp),
-//                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-
                 VerticalSplittable(
                     Modifier.fillMaxSize().padding(bottom = 60.dp),
                     panelState.splitter,
@@ -85,10 +76,9 @@ fun MainView() {
                             (panelState.expandedSize + it).coerceAtLeast(panelState.expandedSizeMin)
                     }
                 ) {
-
                     ResizablePanel(Modifier.width(animatedSize).fillMaxHeight(), panelState) {
                         Column(
-                            modifier = Modifier.fillMaxHeight().fillMaxWidth()/*.weight(0.2f)*/,
+                            modifier = Modifier.fillMaxHeight()/*.weight(0.2f)*/,
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
@@ -129,45 +119,54 @@ fun MainView() {
                         }
                     }
 
-
-                    Box {
-
-                        Row(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    Box() {
+                        VerticalSplittable(
+                            Modifier.fillMaxSize(),
+                            panelState2.splitter,
+                            onResize = {
+                                panelState2.expandedSize =
+                                    (panelState2.expandedSize + it).coerceAtLeast(panelState2.expandedSizeMin)
+                            }
                         ) {
-                            Column(
-                                modifier = Modifier.fillMaxSize().weight(0.7f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
+                            ResizablePanel(
+                                Modifier.width(animatedSize2).fillMaxHeight(),
+                                panelState2, false
                             ) {
-                                Box(
-                                    modifier = Modifier.background(color = Color(200, 200, 200))
-                                        .fillMaxHeight().fillMaxWidth().weight(0.6f),
-                                    contentAlignment = Alignment.Center
+                                Column(
+                                    Modifier.fillMaxHeight(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
                                 ) {
+                                    Box(
+                                        modifier = Modifier.background(color = Color(200, 200, 200))
+                                            .fillMaxHeight().fillMaxWidth(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
 
-                                    Text("CENTER")
+                                        Text("ResizablePanel2")
+                                    }
                                 }
                             }
-                            Column(
-                                modifier = Modifier.fillMaxSize().weight(0.3f),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                Box(
-                                    modifier = Modifier.background(color = Color(200, 200, 200))
-                                        .fillMaxHeight().fillMaxWidth().weight(0.6f),
-                                    contentAlignment = Alignment.Center
+                            Box {
+                                Column(
+                                    modifier = Modifier,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
                                 ) {
+                                    Box(
+                                        modifier = Modifier.background(color = Color(200, 200, 200))
+                                            .fillMaxHeight(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
 
-                                    Text("MOCK2")
+                                        Text("CENTER")
+                                    }
                                 }
                             }
 
                         }
                     }
+
                 }
             },
 
@@ -185,117 +184,3 @@ fun MainView() {
         )
     }
 }
-
-class SplitterState {
-    var isResizing by mutableStateOf(false)
-    var isResizeEnabled by mutableStateOf(true)
-}
-
-private class PanelState {
-    val collapsedSize = 24.dp
-    var expandedSize by mutableStateOf(300.dp)
-    val expandedSizeMin = 90.dp
-    var isExpanded by mutableStateOf(true)
-    val splitter = SplitterState()
-}
-
-@Composable
-private fun ResizablePanel(
-    modifier: Modifier,
-    state: PanelState,
-    content: @Composable () -> Unit,
-) {
-    val alpha by animateFloatAsState(if (state.isExpanded) 1f else 0f, SpringSpec(stiffness = Spring.StiffnessLow))
-
-    Box(modifier) {
-        Box(Modifier.fillMaxSize().graphicsLayer(alpha = alpha)) {
-            content()
-        }
-
-        Icon(
-            if (state.isExpanded) Icons.Default.ArrowBack else Icons.Default.ArrowForward,
-            contentDescription = if (state.isExpanded) "Collapse" else "Expand",
-            tint = LocalContentColor.current,
-            modifier = Modifier
-                .padding(top = 4.dp)
-                .width(24.dp)
-                .clickable {
-                    state.isExpanded = !state.isExpanded
-                }
-                .padding(4.dp)
-                .align(Alignment.TopEnd)
-        )
-    }
-}
-
-@Composable
-fun VerticalSplittable(
-    modifier: Modifier,
-    splitterState: SplitterState,
-    onResize: (delta: Dp) -> Unit,
-    children: @Composable () -> Unit
-) = Layout({
-    children()
-    VerticalSplitter(splitterState, onResize)
-}, modifier, measurePolicy = { measurables, constraints ->
-//    require(measurables.size == 3)
-
-    val firstPlaceable = measurables[0].measure(constraints.copy(minWidth = 0))
-    val secondWidth = constraints.maxWidth - firstPlaceable.width
-    val secondPlaceable = measurables[1].measure(
-        Constraints(
-            minWidth = secondWidth,
-            maxWidth = secondWidth,
-            minHeight = constraints.maxHeight,
-            maxHeight = constraints.maxHeight
-        )
-    )
-    val splitterPlaceable = measurables[2].measure(constraints)
-    layout(constraints.maxWidth, constraints.maxHeight) {
-        firstPlaceable.place(0, 0)
-        secondPlaceable.place(firstPlaceable.width, 0)
-        splitterPlaceable.place(firstPlaceable.width, 0)
-    }
-})
-
-@Composable
-fun VerticalSplitter(
-    splitterState: SplitterState,
-    onResize: (delta: Dp) -> Unit,
-    color: Color = Color.Blue
-) = Box {
-    val density = LocalDensity.current
-    Box(
-        Modifier
-            .width(8.dp)
-            .fillMaxHeight()
-            .run {
-                if (splitterState.isResizeEnabled) {
-                    this.draggable(
-                        state = rememberDraggableState {
-                            with(density) {
-                                onResize(it.toDp())
-                            }
-                        },
-                        orientation = Orientation.Horizontal,
-                        startDragImmediately = true,
-                        onDragStarted = { splitterState.isResizing = true },
-                        onDragStopped = { splitterState.isResizing = false }
-                    ).cursorForHorizontalResize()
-                } else {
-                    this
-                }
-            }
-    )
-
-    Box(
-        Modifier
-            .width(1.dp)
-            .fillMaxHeight()
-            .background(color)
-    )
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-fun Modifier.cursorForHorizontalResize(): Modifier =
-    this.pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
