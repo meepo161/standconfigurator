@@ -12,6 +12,9 @@ version = "0.0001a"
 
 repositories {
     jcenter()
+    flatDir {
+        dir("libs")
+    }
     mavenCentral()
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
 }
@@ -19,6 +22,10 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation("org.jetbrains.compose.components:components-splitpane:1.1.1")
+
+    implementation ("cafe.adriel.voyager:voyager-navigator:1.0.0-rc02")
+    implementation ("cafe.adriel.voyager:voyager-tab-navigator:1.0.0-rc02")
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
 
 tasks.withType<KotlinCompile>() {

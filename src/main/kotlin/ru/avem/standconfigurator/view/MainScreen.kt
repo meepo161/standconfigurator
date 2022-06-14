@@ -6,43 +6,71 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.HorizontalSplitPane
 import org.jetbrains.compose.splitpane.VerticalSplitPane
 import org.jetbrains.compose.splitpane.rememberSplitPaneState
 import ru.avem.standconfigurator.Devices
-import java.awt.Cursor
 
 @OptIn(ExperimentalSplitPaneApi::class)
-@Composable
-@Preview
-fun MainView() {
-    MaterialTheme(typography = Typography(FontFamily.Monospace)) {
+class MainScreen : Screen {
+    @OptIn(DelicateCoroutinesApi::class)
+    @Composable
+    @Preview
+    override fun Content() {
+        val localNavigator = LocalNavigator.currentOrThrow
+        var isExpanded by remember { mutableStateOf(false) }
+        val scaffoldState = rememberScaffoldState()
+        val scope = rememberCoroutineScope()
+
         Scaffold(
+            scaffoldState = scaffoldState,
             topBar = {
                 TopAppBar {
-                    Button({}) {
+                    Button(onClick = { isExpanded = true }) {
                         Text("Файл")
+                    }
+                    DropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
+                        DropdownMenuItem(onClick = {
+                        }) {
+                            Column {
+                                Button(
+                                    onClick = {
+                                        scope.launch {
+                                            scaffoldState.snackbarHostState.showSnackbar("NIGGER")
+                                        }
+                                    }) {
+                                    Text("Новый")
+                                }
+                                Button(
+                                    onClick = {
+                                        localNavigator.push(LoginScreen())
+                                    }) {
+                                    Text("Выход")
+                                }
+                            }
+                        }
                     }
                 }
             },
 
             content = {
-                val splitpaneState = rememberSplitPaneState(0.3f)
-                val splitpaneState2 = rememberSplitPaneState(0.7f)
+                val splitPaneState = rememberSplitPaneState(0.3f)
+                val splitPaneState2 = rememberSplitPaneState(0.7f)
                 val verticalSplitpaneState = rememberSplitPaneState(0.5f)
 
                 var textCenter by remember { mutableStateOf("") }
                 var textRight by remember { mutableStateOf("") }
 
-                HorizontalSplitPane(splitPaneState = splitpaneState) {
+                HorizontalSplitPane(splitPaneState = splitPaneState) {
                     first() {
                         VerticalSplitPane(
                             splitPaneState = verticalSplitpaneState,
@@ -82,7 +110,7 @@ fun MainView() {
                         }
                     }
                     second {
-                        HorizontalSplitPane(splitPaneState = splitpaneState2) {
+                        HorizontalSplitPane(splitPaneState = splitPaneState2) {
                             first {
                                 Column(
                                     modifier = Modifier.fillMaxHeight().fillMaxWidth(),
@@ -170,11 +198,3 @@ fun MainView() {
         )
     }
 }
-
-@OptIn(ExperimentalComposeUiApi::class)
-fun Modifier.cursorForHorizontalResize(): Modifier =
-    this.pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
-
-@OptIn(ExperimentalComposeUiApi::class)
-fun Modifier.cursorForVerticalResize(): Modifier =
-    this.pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))
