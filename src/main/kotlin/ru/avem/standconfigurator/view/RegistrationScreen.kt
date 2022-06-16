@@ -7,9 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Face
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
@@ -23,24 +21,26 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import ru.avem.standconfigurator.model.UserModel
+import ru.avem.standconfigurator.model.UsersRepository
 
 class RegistrationScreen : Screen {
     @Composable
     override fun Content() {
-        val localNavigator = LocalNavigator.currentOrThrow
+        var localNavigator = LocalNavigator.currentOrThrow
 
-        val name = remember {
+        var name by remember {
             mutableStateOf(TextFieldValue())
         }
-        val login = remember { mutableStateOf(TextFieldValue()) }
-        val password = remember { mutableStateOf(TextFieldValue()) }
-        val confirmPassword = remember { mutableStateOf(TextFieldValue()) }
+        var login by remember { mutableStateOf(TextFieldValue()) }
+        var password by remember { mutableStateOf(TextFieldValue()) }
+        var confirmPassword by remember { mutableStateOf(TextFieldValue()) }
 
-        val nameErrorState = remember { mutableStateOf(false) }
-        val loginErrorState = remember { mutableStateOf(false) }
-        val passwordErrorState = remember { mutableStateOf(false) }
-        val confirmPasswordErrorState = remember { mutableStateOf(false) }
-        val scrollState = rememberScrollState()
+        var nameErrorState by remember { mutableStateOf(false) }
+        var loginErrorState by remember { mutableStateOf(false) }
+        var passwordErrorState by remember { mutableStateOf(false) }
+        var confirmPasswordErrorState by remember { mutableStateOf(false) }
+        var scrollState = rememberScrollState()
 
         Column(
             modifier = Modifier
@@ -60,115 +60,109 @@ class RegistrationScreen : Screen {
             }, fontSize = 30.sp)
             Spacer(Modifier.size(16.dp))
             OutlinedTextField(
-                value = name.value,
+                value = name,
                 onValueChange = {
-                    if (nameErrorState.value) {
-                        nameErrorState.value = false
+                    if (nameErrorState) {
+                        nameErrorState = false
                     }
-                    name.value = it
+                    name = it
                 },
 
                 modifier = Modifier.fillMaxWidth(),
-                isError = nameErrorState.value,
+                isError = nameErrorState,
                 label = {
                     Text(text = "ФИО*")
                 },
             )
-            if (nameErrorState.value) {
+            if (nameErrorState) {
                 Text(text = "Обязательно", color = MaterialTheme.colors.primary)
             }
             Spacer(Modifier.size(16.dp))
 
             OutlinedTextField(
-                value = login.value,
+                value = login,
                 onValueChange = {
-                    if (loginErrorState.value) {
-                        loginErrorState.value = false
+                    if (loginErrorState) {
+                        loginErrorState = false
                     }
-                    login.value = it
+                    login = it
                 },
 
                 modifier = Modifier.fillMaxWidth(),
-                isError = loginErrorState.value,
+                isError = loginErrorState,
                 label = {
                     Text(text = "Логин*")
                 },
             )
-            if (loginErrorState.value) {
+            if (loginErrorState) {
                 Text(text = "Обязательно", color = MaterialTheme.colors.primary)
             }
 
             Spacer(Modifier.size(16.dp))
-            val passwordVisibility = remember { mutableStateOf(true) }
+            var passwordVisibility by remember { mutableStateOf(true) }
             OutlinedTextField(
-                value = password.value,
+                value = password,
                 onValueChange = {
-                    if (passwordErrorState.value) {
-                        passwordErrorState.value = false
+                    if (passwordErrorState) {
+                        passwordErrorState = false
                     }
-                    password.value = it
+                    password = it
                 },
                 modifier = Modifier.fillMaxWidth(),
                 label = {
                     Text(text = "Пароль*")
                 },
-                isError = passwordErrorState.value,
+                isError = passwordErrorState,
                 trailingIcon = {
                     IconButton(onClick = {
-                        passwordVisibility.value = !passwordVisibility.value
+                        passwordVisibility = !passwordVisibility
                     }) {
                         Icon(
-                            imageVector = if (passwordVisibility.value) Icons.Default.Face else Icons.Default.Clear,
+                            imageVector = if (passwordVisibility) Icons.Default.Face else Icons.Default.Clear,
                             contentDescription = "visibility",
                             tint = MaterialTheme.colors.primary
                         )
                     }
                 },
-                visualTransformation = if (passwordVisibility.value) PasswordVisualTransformation() else VisualTransformation.None
+                visualTransformation = if (passwordVisibility) PasswordVisualTransformation() else VisualTransformation.None
             )
-            if (passwordErrorState.value) {
+            if (passwordErrorState) {
                 Text(text = "Обязательно", color = MaterialTheme.colors.primary)
             }
 
             Spacer(Modifier.size(16.dp))
-            val cPasswordVisibility = remember { mutableStateOf(true) }
+            var cPasswordVisibility by remember { mutableStateOf(true) }
             OutlinedTextField(
-                value = confirmPassword.value,
+                value = confirmPassword,
                 onValueChange = {
-                    if (confirmPasswordErrorState.value) {
-                        confirmPasswordErrorState.value = false
+                    if (confirmPasswordErrorState) {
+                        confirmPasswordErrorState = false
                     }
-                    confirmPassword.value = it
+                    confirmPassword = it
                 },
                 modifier = Modifier.fillMaxWidth(),
-                isError = confirmPasswordErrorState.value,
+                isError = confirmPasswordErrorState,
                 label = {
                     Text(text = "Повторите пароль*")
                 },
                 trailingIcon = {
                     IconButton(onClick = {
-                        cPasswordVisibility.value = !cPasswordVisibility.value
+                        cPasswordVisibility = !cPasswordVisibility
                     }) {
                         Icon(
-                            imageVector = if (cPasswordVisibility.value) Icons.Default.Face else Icons.Default.Clear,
+                            imageVector = if (cPasswordVisibility) Icons.Default.Face else Icons.Default.Clear,
                             contentDescription = "visibility",
                             tint = MaterialTheme.colors.primary
                         )
                     }
                 },
-                visualTransformation = if (cPasswordVisibility.value) PasswordVisualTransformation() else VisualTransformation.None
+                visualTransformation = if (cPasswordVisibility) PasswordVisualTransformation() else VisualTransformation.None
             )
-            if (confirmPasswordErrorState.value) {
+            if (confirmPasswordErrorState) {
                 val msg = when {
-                    confirmPassword.value.text.isEmpty() -> {
-                        "Обязательно"
-                    }
-                    confirmPassword.value.text != password.value.text -> {
-                        "Пароли не совпадают"
-                    }
-                    else -> {
-                        ""
-                    }
+                    confirmPassword.text.isEmpty() -> "Обязательно"
+                    confirmPassword.text != password.text -> "Пароли не совпадают"
+                    else -> ""
                 }
                 Text(text = msg, color = MaterialTheme.colors.primary)
             }
@@ -176,23 +170,29 @@ class RegistrationScreen : Screen {
             Button(
                 onClick = {
                     when {
-                        name.value.text.isEmpty() -> {
-                            nameErrorState.value = true
+                        name.text.isEmpty() -> {
+                            nameErrorState = true
                         }
-                        login.value.text.isEmpty() -> {
-                            loginErrorState.value = true
+                        login.text.isEmpty() -> {
+                            loginErrorState = true
                         }
-                        password.value.text.isEmpty() -> {
-                            passwordErrorState.value = true
+                        password.text.isEmpty() -> {
+                            passwordErrorState = true
                         }
-                        confirmPassword.value.text.isEmpty() -> {
-                            confirmPasswordErrorState.value = true
+                        confirmPassword.text.isEmpty() -> {
+                            confirmPasswordErrorState = true
                         }
-                        confirmPassword.value.text != password.value.text -> {
-                            confirmPasswordErrorState.value = true
+                        confirmPassword.text != password.text -> {
+                            confirmPasswordErrorState = true
                         }
                         else -> {
-                            localNavigator.push(LoginScreen())
+                            UsersRepository.addUser(
+                                UserModel(
+                                    name = name.text,
+                                    login = login.text,
+                                    password = password.text
+                                )
+                            )
                         }
                     }
                 },
@@ -211,4 +211,5 @@ class RegistrationScreen : Screen {
                 }
             }
         }
-    }}
+    }
+}

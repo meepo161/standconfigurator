@@ -32,3 +32,4 @@ hs_err_pid*
 /report
 .properties
 data.db
+users.json
