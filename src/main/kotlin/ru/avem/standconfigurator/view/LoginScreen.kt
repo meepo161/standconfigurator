@@ -1,6 +1,7 @@
 package ru.avem.standconfigurator.view
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusTarget
@@ -65,116 +67,120 @@ class LoginScreen : Screen {
         val users = UsersRepository.users
         Scaffold(
             content = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center,
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
-                            append("В")
-                        }
-                        withStyle(style = SpanStyle(color = Color.Black)) {
-                            append("ход")
-                        }
-                    }, fontSize = 30.sp)
-                    Spacer(Modifier.size(16.dp))
-                    OutlinedTextField(
-                        singleLine = true,
-                        value = login,
-                        onValueChange = {
-                            if (loginErrorState) {
-                                loginErrorState = false
+                    Column(
+                        modifier = Modifier.padding(16.dp).fillMaxSize(0.3f),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
+                                append("В")
                             }
-                            login = it
-                        },
-                        isError = loginErrorState,
-                        modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
-                            keyEventNext(it, focusManager)
-                        },
-                        label = {
-                            Text(text = "Введите логин*")
-                        },
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        keyboardActions = keyboardActionNext(focusManager)
-                    )
-                    if (loginErrorState) {
-                        Text(text = "Обязательно", color = MaterialTheme.colors.primary)
-                    }
-                    Spacer(Modifier.size(16.dp))
-                    var passwordVisibility by remember { mutableStateOf(true) }
-                    OutlinedTextField(
-                        singleLine = true,
-                        value = password,
-                        onValueChange = {
-                            if (passwordErrorState) {
-                                passwordErrorState = false
+                            withStyle(style = SpanStyle(color = Color.Black)) {
+                                append("ход")
                             }
-                            password = it
-                        },
-                        isError = passwordErrorState,
-                        modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
-                            keyEventNext(it, focusManager)
-                        },
-                        label = {
-                            Text(text = "Введите пароль*")
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = {
-                                passwordVisibility = !passwordVisibility
-                            }) {
-                                Icon(
-                                    imageVector = if (passwordVisibility) Icons.Default.Face else Icons.Default.Clear,
-                                    contentDescription = "visibility",
-                                    tint = MaterialTheme.colors.primary
-                                )
-                            }
-                        },
-                        visualTransformation = if (passwordVisibility) PasswordVisualTransformation() else VisualTransformation.None,
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                        keyboardActions = keyboardActionNext(focusManager)
-                    )
-                    if (passwordErrorState) {
-                        Text(text = "Обязательно", color = MaterialTheme.colors.primary)
-                    }
-                    Spacer(Modifier.size(16.dp))
-                    Button(
-                        onClick = {
-                            when {
-                                login.text.isEmpty() -> {
-                                    loginErrorState = true
+                        }, fontSize = 30.sp)
+                        Spacer(Modifier.size(16.dp))
+                        OutlinedTextField(
+                            singleLine = true,
+                            value = login,
+                            onValueChange = {
+                                if (loginErrorState) {
+                                    loginErrorState = false
                                 }
-                                password.text.isEmpty() -> {
-                                    passwordErrorState = true
+                                login = it
+                            },
+                            isError = loginErrorState,
+                            modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
+                                keyEventNext(it, focusManager)
+                            },
+                            label = {
+                                Text(text = "Введите логин*")
+                            },
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            keyboardActions = keyboardActionNext(focusManager)
+                        )
+                        if (loginErrorState) {
+                            Text(text = "Обязательно", color = MaterialTheme.colors.primary)
+                        }
+                        Spacer(Modifier.size(16.dp))
+                        var passwordVisibility by remember { mutableStateOf(true) }
+                        OutlinedTextField(
+                            singleLine = true,
+                            value = password,
+                            onValueChange = {
+                                if (passwordErrorState) {
+                                    passwordErrorState = false
                                 }
-                                else -> {
-                                    val currentUser = users.firstOrNull() { user ->
-                                        user.login == login.text && user.password == password.text
-                                    }
-                                    if (currentUser != null) {
-                                        MainModel.currentUser = currentUser
-                                        localNavigator.push(ProjectSelectorScreen())
-                                    } else {
+                                password = it
+                            },
+                            isError = passwordErrorState,
+                            modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
+                                keyEventNext(it, focusManager)
+                            },
+                            label = {
+                                Text(text = "Введите пароль*")
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    passwordVisibility = !passwordVisibility
+                                }) {
+                                    Icon(
+                                        imageVector = if (passwordVisibility) Icons.Default.Face else Icons.Default.Clear,
+                                        contentDescription = "visibility",
+                                        tint = MaterialTheme.colors.primary
+                                    )
+                                }
+                            },
+                            visualTransformation = if (passwordVisibility) PasswordVisualTransformation() else VisualTransformation.None,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                            keyboardActions = keyboardActionNext(focusManager)
+                        )
+                        if (passwordErrorState) {
+                            Text(text = "Обязательно", color = MaterialTheme.colors.primary)
+                        }
+                        Spacer(Modifier.size(16.dp))
+                        Button(
+                            onClick = {
+                                when {
+                                    login.text.isEmpty() -> {
                                         loginErrorState = true
+                                    }
+                                    password.text.isEmpty() -> {
                                         passwordErrorState = true
                                     }
+                                    else -> {
+                                        val currentUser = users.firstOrNull() { user ->
+                                            user.login == login.text && user.password == password.text
+                                        }
+                                        if (currentUser != null) {
+                                            MainModel.currentUser = currentUser
+                                            localNavigator.push(ProjectSelectorScreen())
+                                        } else {
+                                            loginErrorState = true
+                                            passwordErrorState = true
+                                        }
+                                    }
                                 }
-                            }
 
-                        },
-                        content = {
-                            Text(text = "Вход", color = Color.White)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
-                    )
+                            },
+                            content = {
+                                Text(text = "Вход", color = Color.White)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
+                        )
 //                    Spacer(Modifier.size(16.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                        TextButton(onClick = {
-                            localNavigator.push(RegistrationScreen())
-                        }) {
-                            Text(text = "Регистрация", color = MaterialTheme.colors.primary)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                            TextButton(onClick = {
+                                localNavigator.push(RegistrationScreen())
+                            }) {
+                                Text(text = "Регистрация", color = MaterialTheme.colors.primary)
+                            }
                         }
                     }
                 }

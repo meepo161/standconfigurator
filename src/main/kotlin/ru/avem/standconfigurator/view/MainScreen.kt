@@ -214,6 +214,7 @@ class MainScreen : Screen {
                         contentAlignment = Alignment.BottomEnd
                     ) {
                         Text(text = projects[MainModel.currentProjectIndex].toString())
+                        MainModel.currentProjectIndex = -1
                     }
                 }
             }

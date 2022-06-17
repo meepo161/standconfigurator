@@ -88,7 +88,7 @@ fun <T> TableView(items: List<T>, columns: List<KProperty1<T, Any>>, columnNames
                     projectState[i] = !projectState[i]
                     MainModel.currentProjectIndex = i
                 }).background(
-                    if (projectState[i]) {
+                    if (projectState[i] && MainModel.currentProjectIndex != -1) {
                         Color.Cyan
                     } else {
                         Color.White

@@ -46,6 +46,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import ru.avem.standconfigurator.model.MainModel
 import ru.avem.standconfigurator.model.ProjectModel
@@ -66,7 +67,6 @@ class ProjectSelectorScreen : Screen {
         val scope = rememberCoroutineScope()
 
         var name by remember { mutableStateOf(TextFieldValue("1")) }
-        var search by remember { mutableStateOf(TextFieldValue("")) }
         var projectErrorState by remember { mutableStateOf(false) }
         var templateErrorState by remember { mutableStateOf(false) }
         var template by remember { mutableStateOf(TextFieldValue("1")) }
@@ -201,7 +201,7 @@ class ProjectSelectorScreen : Screen {
                             },
                             isError = projectNameErrorState.value,
                             label = {
-                                Text(text = "Поиск")
+                                Text(text = "Фильтр")
                             },
                         )
                         Button(
@@ -214,16 +214,29 @@ class ProjectSelectorScreen : Screen {
                         Button(
                             modifier = Modifier.height(56.dp),
                             onClick = {
-                                localNavigator.push(MainScreen())
+                                if (MainModel.currentProjectIndex != -1) {
+                                    localNavigator.push(MainScreen())
+                                } else {
+                                    scope.launch {
+                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
+                                    }
+                                }
                             }) {
                             Text("Открыть")
                         }
                         Button(
                             modifier = Modifier.height(56.dp),
                             onClick = {
-                                ProjectRepository.removeProject(MainModel.currentProjectIndex)
-                                projectNameErrorState.value = false
-                                projectNameErrorState.value = true //TODO перерисовывать нормально
+                                if (MainModel.currentProjectIndex != -1) {
+                                    ProjectRepository.removeProject(MainModel.currentProjectIndex)
+                                    MainModel.currentProjectIndex = -1
+                                    projectNameErrorState.value = false
+                                    projectNameErrorState.value = true //TODO перерисовывать нормально
+                                } else {
+                                    scope.launch {
+                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
+                                    }
+                                }
                             }) {
                             Text("Удалить")
                         }
