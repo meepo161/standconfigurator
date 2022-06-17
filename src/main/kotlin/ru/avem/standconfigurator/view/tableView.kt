@@ -2,6 +2,7 @@ package ru.avem.standconfigurator.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -11,6 +12,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,11 +23,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.ProjectRepository
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
 @Composable
 fun <T> TableView(items: List<T>, columns: List<KProperty1<T, Any>>, columnNames: List<String> = emptyList()) {
+
+    val stateFlagList = mutableStateListOf<Boolean>()
+    for (i in items.indices) {
+        stateFlagList.add(false)
+    }
+
+    val projectState by remember {
+        mutableStateOf(stateFlagList)
+    }
+    if (projectState.size < stateFlagList.size) {
+        projectState.add(false)
+    }
+    if (projectState.size > stateFlagList.size) {
+        projectState.removeAt(projectState.size - 1)
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row {
             if (columnNames.size == columns.size) {
@@ -52,8 +76,24 @@ fun <T> TableView(items: List<T>, columns: List<KProperty1<T, Any>>, columnNames
                 }
             }
         }
-        items.forEach { item ->
-            Row {
+        ProjectRepository.projects.forEachIndexed { i, item ->
+            Row(
+                modifier = Modifier.clickable(onClick = {
+                    for (j in items.indices) {
+                        projectState[j] = false
+                    }
+                    projectState[i] = !projectState[i]
+                    MainModel.currentProjectIndex = i
+                }).background(
+                    if (projectState[i]) {
+                        println(2)
+                        Color.Cyan
+                    } else {
+                        println(2)
+                        Color.White
+                    }
+                )
+            ) {
                 columns.forEach { column ->
                     val field = item!!.getField<Any>(column.name)!!.toString()
                     Box(
@@ -62,10 +102,10 @@ fun <T> TableView(items: List<T>, columns: List<KProperty1<T, Any>>, columnNames
                             color = MaterialTheme.colors.primary,
                             shape = RoundedCornerShape(4.dp)
                         )
-                            .weight(0.3f).height(24.dp),
+                            .weight(0.3f).height(48.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(field)
+                        Text(text = field, fontSize = 30.sp)
                     }
                 }
             }

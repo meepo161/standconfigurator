@@ -5,11 +5,20 @@ import java.nio.file.Paths
 object ProjectRepository {
     lateinit var projects: MutableList<ProjectModel>
 
-    fun addUser(projectModel: ProjectModel) {
+    fun addProject(projectModel: ProjectModel) {
         projects.add(projectModel)
 
         saveToJsonFile(
-            Paths.get("users.json"),
+            Paths.get("projects.json"),
+            projects
+        )
+    }
+
+    fun removeProject(projectIndex: Int) {
+        projects.removeAt(projectIndex)
+
+        saveToJsonFile(
+            Paths.get("projects.json"),
             projects
         )
     }

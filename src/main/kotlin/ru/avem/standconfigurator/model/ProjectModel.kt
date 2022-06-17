@@ -4,8 +4,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ProjectModel(
-    val name: String = "",
-    val date: String = "",
-    val author: String = ""
-)
+    var name: String = "",
+    var date: String = "",
+    var author: String = ""
+) {
+    override fun toString() = "$name | $date | $author"
+}
 
