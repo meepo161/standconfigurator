@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +50,7 @@ fun <T> TableView(items: List<T>, columns: List<KProperty1<T, Any>>, columnNames
         projectState.removeAt(projectState.size - 1)
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 60.dp)) {
         Row {
             if (columnNames.size == columns.size) {
                 columnNames.forEach {
@@ -86,10 +89,8 @@ fun <T> TableView(items: List<T>, columns: List<KProperty1<T, Any>>, columnNames
                     MainModel.currentProjectIndex = i
                 }).background(
                     if (projectState[i]) {
-                        println(2)
                         Color.Cyan
                     } else {
-                        println(2)
                         Color.White
                     }
                 )
