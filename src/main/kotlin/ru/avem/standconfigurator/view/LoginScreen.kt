@@ -57,10 +57,10 @@ class LoginScreen : Screen {
         val localNavigator = LocalNavigator.currentOrThrow
         val focusManager = LocalFocusManager.current
 
-        var login by remember { mutableStateOf(TextFieldValue()) }
+        var login by remember { mutableStateOf(TextFieldValue("1")) }
         var loginErrorState by remember { mutableStateOf(false) }
         var passwordErrorState by remember { mutableStateOf(false) }
-        var password by remember { mutableStateOf(TextFieldValue()) }
+        var password by remember { mutableStateOf(TextFieldValue("1")) }
 
         val users = UsersRepository.users
 

@@ -26,6 +26,7 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-navigator:1.0.0-rc02")
     implementation("cafe.adriel.voyager:voyager-tab-navigator:1.0.0-rc02")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
 

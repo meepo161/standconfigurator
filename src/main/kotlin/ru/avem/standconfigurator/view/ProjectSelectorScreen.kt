@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
@@ -31,6 +33,8 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.ProjectModel
+import ru.avem.standconfigurator.model.ProjectRepository
 
 @OptIn(ExperimentalSplitPaneApi::class)
 class ProjectSelectorScreen : Screen {
@@ -46,12 +50,14 @@ class ProjectSelectorScreen : Screen {
         val projectName = remember { mutableStateOf(TextFieldValue()) }
         val projectNameErrorState = remember { mutableStateOf(false) }
 
+        val projects = ProjectRepository.projects
+
         Scaffold(
             scaffoldState = scaffoldState,
 
             content = {
                 scope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar("Здравсвуйте, ${MainModel.currentUser.name}")
+                    scaffoldState.snackbarHostState.showSnackbar("Здравствуйте, ${MainModel.currentUser.name}")
                 }
                 Column(
                     modifier = Modifier.padding(16.dp)
@@ -88,9 +94,24 @@ class ProjectSelectorScreen : Screen {
                             Text("Открыть")
                         }
                     }
-                    Projects {
+//                    Projects {
+//
+//                    }
 
-                    }
+                    Spacer(Modifier.size(16.dp))
+                    TableView(
+                        projects,
+                        listOf(
+                            ProjectModel::name,
+                            ProjectModel::date,
+                            ProjectModel::author,
+                        ),
+                        listOf(
+                            "Название",
+                            "Дата",
+                            "Автор",
+                        )
+                    )
                 }
 
 
