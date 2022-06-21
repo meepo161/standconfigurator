@@ -1,12 +1,15 @@
 package ru.avem.standconfigurator.model
 
+import ru.avem.standconfigurator.model.blob.User
+import ru.avem.standconfigurator.model.utils.loadFromJson
+import ru.avem.standconfigurator.model.utils.saveToJsonFile
 import java.nio.file.Paths
 
 object UsersRepository {
-    lateinit var users: MutableList<UserModel>
+    lateinit var users: MutableList<User>
 
-    fun addUser(userModel: UserModel) {
-        users.add(userModel)
+    fun add(user: User) {
+        users.add(user)
 
         saveToJsonFile(
             Paths.get("users.json"),
@@ -18,7 +21,7 @@ object UsersRepository {
         try {
             users = loadFromJson(Paths.get("users.json"))
         } catch (e: Exception) {
-            users = mutableListOf(UserModel("adminAvem", "admin", "avem"))
+            users = mutableListOf(User("adminAvem", "admin", "avem"))
             saveToJsonFile(
                 Paths.get("users.json"),
                 users

@@ -1,34 +1,10 @@
 package ru.avem.standconfigurator.view
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.Button
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusTarget
@@ -45,22 +21,22 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import ru.avem.standconfigurator.model.MainModel
-import ru.avem.standconfigurator.model.ProjectModel
 import ru.avem.standconfigurator.model.ProjectRepository
+import ru.avem.standconfigurator.model.ProjectsViewModel
+import ru.avem.standconfigurator.model.blob.Project
 import java.text.SimpleDateFormat
 
-@OptIn(ExperimentalSplitPaneApi::class)
 class ProjectSelectorScreen : Screen {
-    @OptIn(DelicateCoroutinesApi::class, ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     @Preview
     override fun Content() {
         val localNavigator = LocalNavigator.currentOrThrow
         val focusManager = LocalFocusManager.current
+        val pvm = ProjectsViewModel()
+        var filteredProjects by remember { mutableStateOf(listOf(*pvm.projects.toTypedArray())) }
 
         var isNewProjectDialogVisible by remember { mutableStateOf(false) }
         val scaffoldState = rememberScaffoldState()
@@ -70,119 +46,124 @@ class ProjectSelectorScreen : Screen {
         var projectErrorState by remember { mutableStateOf(false) }
         var templateErrorState by remember { mutableStateOf(false) }
         var template by remember { mutableStateOf(TextFieldValue("1")) }
-        val projectName = remember { mutableStateOf(TextFieldValue()) }
-        val projectNameErrorState = remember { mutableStateOf(false) }
+        var filterValue by remember { mutableStateOf("") }
+        var projectNameErrorState by remember { mutableStateOf(false) }
+        var currentProject by remember { mutableStateOf(filteredProjects.firstOrNull()) }
+
+        @OptIn(ExperimentalMaterialApi::class)
+        @Composable
+        fun AddProjectDialog() {
+            AlertDialog(modifier = Modifier.width(600.dp).padding(16.dp),
+                onDismissRequest = { isNewProjectDialogVisible = false },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
+                                append("З")
+                            }
+                            withStyle(style = SpanStyle(color = Color.Black)) {
+                                append("аполните поля")
+                            }
+                        }, fontSize = 30.sp)
+                    }
+                }, buttons = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    pvm.add(
+                                        Project(
+                                            name.text,
+                                            SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()),
+                                            MainModel.currentUser.name
+                                        )
+                                    )
+                                    isNewProjectDialogVisible = false
+                                }) {
+                                Text("Создать")
+                            }
+                        }
+                    }
+                }, text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier.height(4.dp),
+                            text = "",
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            OutlinedTextField(
+                                singleLine = true,
+                                value = name,
+                                onValueChange = {
+                                    if (projectErrorState) {
+                                        projectErrorState = false
+                                    }
+                                    name = it
+                                },
+                                isError = projectErrorState,
+                                modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
+                                    keyEventNext(it, focusManager)
+                                },
+                                label = {
+                                    Text(text = "Введите название проекта*")
+                                },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = keyboardActionNext(focusManager)
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            OutlinedTextField(
+                                singleLine = true,
+                                value = template,
+                                onValueChange = {
+                                    if (templateErrorState) {
+                                        templateErrorState = false
+                                    }
+                                    template = it
+                                },
+                                isError = templateErrorState,
+                                modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
+                                    keyEventNext(it, focusManager)
+                                },
+                                label = {
+                                    Text(text = "Введите шаблон*")
+                                },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = keyboardActionNext(focusManager)
+                            )
+                        }
+                    }
+                })
+        }
 
         Scaffold(
             scaffoldState = scaffoldState,
-
             content = {
                 if (isNewProjectDialogVisible) {
-                    AnimatedVisibility(isNewProjectDialogVisible) {
-                        AlertDialog(modifier = Modifier.width(600.dp).padding(16.dp),
-                            onDismissRequest = { isNewProjectDialogVisible = false },
-                            title = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(text = buildAnnotatedString {
-                                        withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
-                                            append("З")
-                                        }
-                                        withStyle(style = SpanStyle(color = Color.Black)) {
-                                            append("аполните поля")
-                                        }
-                                    }, fontSize = 30.sp)
-                                }
-                            }, buttons = {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Button(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            onClick = {
-                                                ProjectRepository.addProject(
-                                                    ProjectModel(
-                                                        name.text,
-                                                        SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()),
-                                                        MainModel.currentUser.name
-                                                    )
-                                                )
-                                                isNewProjectDialogVisible = false
-                                            }) {
-                                            Text("Создать")
-                                        }
-                                    }
-                                }
-                            }, text = {
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Text(
-                                        modifier = Modifier.height(4.dp),
-                                        text = "",
-                                    )
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        OutlinedTextField(
-                                            singleLine = true,
-                                            value = name,
-                                            onValueChange = {
-                                                if (projectErrorState) {
-                                                    projectErrorState = false
-                                                }
-                                                name = it
-                                            },
-                                            isError = projectErrorState,
-                                            modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
-                                                keyEventNext(it, focusManager)
-                                            },
-                                            label = {
-                                                Text(text = "Введите название проекта*")
-                                            },
-                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                            keyboardActions = keyboardActionNext(focusManager)
-                                        )
-                                    }
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.SpaceBetween
-                                    ) {
-                                        OutlinedTextField(
-                                            singleLine = true,
-                                            value = template,
-                                            onValueChange = {
-                                                if (templateErrorState) {
-                                                    templateErrorState = false
-                                                }
-                                                template = it
-                                            },
-                                            isError = templateErrorState,
-                                            modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
-                                                keyEventNext(it, focusManager)
-                                            },
-                                            label = {
-                                                Text(text = "Введите шаблон*")
-                                            },
-                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                            keyboardActions = keyboardActionNext(focusManager)
-                                        )
-                                    }
-                                }
-                            })
-                    }
+                    AddProjectDialog()
                 }
+
                 Column(
                     modifier = Modifier.padding(16.dp)
                 ) {
@@ -192,14 +173,16 @@ class ProjectSelectorScreen : Screen {
                     ) {
                         TextField(
                             modifier = Modifier.weight(0.8f),
-                            value = projectName.value,
-                            onValueChange = {
-                                if (projectNameErrorState.value) {
-                                    projectNameErrorState.value = false
+                            value = filterValue,
+                            onValueChange = { newText ->
+                                if (projectNameErrorState) {
+                                    projectNameErrorState = false
                                 }
-                                projectName.value = it
+                                filteredProjects = pvm.projects.filter { it.name.contains(newText) }
+                                filterValue = newText
+                                currentProject = null
                             },
-                            isError = projectNameErrorState.value,
+                            isError = projectNameErrorState,
                             label = {
                                 Text(text = "Фильтр")
                             },
@@ -214,8 +197,8 @@ class ProjectSelectorScreen : Screen {
                         Button(
                             modifier = Modifier.height(56.dp),
                             onClick = {
-                                if (MainModel.currentProjectIndex != -1) {
-                                    localNavigator.push(MainScreen())
+                                if (currentProject != null) {
+                                    localNavigator.push(MainScreen(currentProject!!))
                                 } else {
                                     scope.launch {
                                         scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
@@ -227,11 +210,9 @@ class ProjectSelectorScreen : Screen {
                         Button(
                             modifier = Modifier.height(56.dp),
                             onClick = {
-                                if (MainModel.currentProjectIndex != -1) {
-                                    ProjectRepository.removeProject(MainModel.currentProjectIndex)
-                                    MainModel.currentProjectIndex = -1
-                                    projectNameErrorState.value = false
-                                    projectNameErrorState.value = true //TODO перерисовывать нормально
+                                if (currentProject != null) {
+                                    pvm.remove(currentProject!!)
+                                    currentProject = null
                                 } else {
                                     scope.launch {
                                         scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
@@ -243,18 +224,20 @@ class ProjectSelectorScreen : Screen {
                     }
                     Spacer(Modifier.size(16.dp))
                     TableView(
-                        ProjectRepository.projects,
+                        filteredProjects,
                         listOf(
-                            ProjectModel::name,
-                            ProjectModel::date,
-                            ProjectModel::author,
+                            Project::name,
+                            Project::date,
+                            Project::author,
                         ),
                         listOf(
                             "Название",
                             "Дата",
                             "Автор",
                         )
-                    )
+                    ) {
+                        currentProject = ProjectRepository.projects[it]
+                    }
                 }
             },
 

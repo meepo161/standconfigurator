@@ -1,11 +1,10 @@
-package ru.avem.standconfigurator.model
+package ru.avem.standconfigurator.model.utils
 
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.nio.file.Path
 import kotlin.io.path.writeText
-
 
 inline fun <reified T> loadFromJson(path: Path): T {
     val resultFile = path.toFile()

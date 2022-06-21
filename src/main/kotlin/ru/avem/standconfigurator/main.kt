@@ -10,7 +10,6 @@ import cafe.adriel.voyager.navigator.Navigator
 import ru.avem.standconfigurator.model.ProjectRepository
 import ru.avem.standconfigurator.model.UsersRepository
 import ru.avem.standconfigurator.view.LoginScreen
-import ru.avem.standconfigurator.view.craneTypography
 
 fun main() = application {
     UsersRepository.init()
@@ -30,4 +29,3 @@ fun main() = application {
         }
     }
 }
-

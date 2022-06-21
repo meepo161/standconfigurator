@@ -1,11 +1,10 @@
-package ru.avem.standconfigurator.model
+package ru.avem.standconfigurator.model.blob
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserModel(
+data class User(
     val name: String = "",
     val login: String = "",
     val password: String = ""
 )
-

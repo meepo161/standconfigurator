@@ -2,28 +2,9 @@ package ru.avem.standconfigurator.view
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.Button
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,44 +12,40 @@ import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.HorizontalSplitPane
 import org.jetbrains.compose.splitpane.VerticalSplitPane
 import org.jetbrains.compose.splitpane.rememberSplitPaneState
 import ru.avem.standconfigurator.Devices
-import ru.avem.standconfigurator.model.MainModel
-import ru.avem.standconfigurator.model.ProjectRepository
+import ru.avem.standconfigurator.model.blob.Project
 
 @OptIn(ExperimentalSplitPaneApi::class)
-class MainScreen : Screen {
-    @OptIn(DelicateCoroutinesApi::class)
+class MainScreen(private val currentProject: Project) : Screen {
     @Composable
     @Preview
     override fun Content() {
         val localNavigator = LocalNavigator.currentOrThrow
-        var isExpanded by remember { mutableStateOf(false) }
+        var isTopBarMenuExpanded by remember { mutableStateOf(false) }
         val scaffoldState = rememberScaffoldState()
         val scope = rememberCoroutineScope()
-
-        val projects = ProjectRepository.projects
 
         Scaffold(
             scaffoldState = scaffoldState,
             topBar = {
                 TopAppBar {
-                    Button(onClick = { isExpanded = true }) {
+                    Button(onClick = { isTopBarMenuExpanded = true }) {
                         Text("Файл")
                     }
-                    DropdownMenu(expanded = isExpanded, onDismissRequest = { isExpanded = false }) {
+                    DropdownMenu(expanded = isTopBarMenuExpanded, onDismissRequest = { isTopBarMenuExpanded = false }) {
                         DropdownMenuItem(onClick = {
                         }) {
                             Column {
                                 Button(
                                     onClick = {
                                         scope.launch {
-                                            scaffoldState.snackbarHostState.showSnackbar("NIGGER")
+                                            isTopBarMenuExpanded = false
+                                            scaffoldState.snackbarHostState.showSnackbar("Для создания нового проекта вернитесь в меню проектов")
                                         }
                                     }) {
                                     Text("Новый")
@@ -88,15 +65,15 @@ class MainScreen : Screen {
             content = {
                 val splitPaneState = rememberSplitPaneState(0.3f)
                 val splitPaneState2 = rememberSplitPaneState(0.7f)
-                val verticalSplitpaneState = rememberSplitPaneState(0.5f)
+                val verticalSplitPaneState = rememberSplitPaneState(0.5f)
 
                 var textCenter by remember { mutableStateOf("") }
                 var textRight by remember { mutableStateOf("") }
 
                 HorizontalSplitPane(splitPaneState = splitPaneState) {
-                    first() {
+                    first {
                         VerticalSplitPane(
-                            splitPaneState = verticalSplitpaneState,
+                            splitPaneState = verticalSplitPaneState,
                             modifier = Modifier.background(Color.Gray)
                         ) {
                             first {
@@ -213,8 +190,7 @@ class MainScreen : Screen {
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.BottomEnd
                     ) {
-                        Text(text = projects[MainModel.currentProjectIndex].toString())
-                        MainModel.currentProjectIndex = -1
+                        Text(text = currentProject.toString())
                     }
                 }
             }
