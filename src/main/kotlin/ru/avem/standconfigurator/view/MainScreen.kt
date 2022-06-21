@@ -52,7 +52,7 @@ class MainScreen : Screen {
         val scaffoldState = rememberScaffoldState()
         val scope = rememberCoroutineScope()
 
-        var projects = ProjectRepository.projects
+        val projects = ProjectRepository.projects
 
         Scaffold(
             scaffoldState = scaffoldState,

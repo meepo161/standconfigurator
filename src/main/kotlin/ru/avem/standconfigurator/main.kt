@@ -1,6 +1,7 @@
 package ru.avem.standconfigurator
 
 import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.application
@@ -21,8 +22,12 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Конфигуратор стендов"
     ) {
-        MaterialTheme(typography = craneTypography) {
+        MaterialTheme(
+            typography = craneTypography,
+            colors = MaterialTheme.colors.copy(secondary = Color(0.38f, 0f, 0.93f))
+        ) {
             Navigator(LoginScreen())
         }
     }
 }
+

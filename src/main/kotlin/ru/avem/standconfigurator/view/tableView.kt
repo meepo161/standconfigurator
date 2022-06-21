@@ -89,14 +89,14 @@ fun <T> TableView(items: List<T>, columns: List<KProperty1<T, Any>>, columnNames
                     MainModel.currentProjectIndex = i
                 }).background(
                     if (projectState[i] && MainModel.currentProjectIndex != -1) {
-                        Color.Cyan
+                        MaterialTheme.colors.secondary
                     } else {
-                        Color.White
+                        MaterialTheme.colors.background
                     }
                 )
             ) {
                 columns.forEach { column ->
-                    val field = item!!.getField<Any>(column.name)!!.toString()
+                    val field = item.getField<Any>(column.name)!!.toString()
                     Box(
                         modifier = Modifier.border(
                             width = 1.dp,
