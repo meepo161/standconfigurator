@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view.devices.avem4
+package ru.avem.standconfigurator.ui.devices.avem4
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
@@ -20,7 +20,7 @@ fun AVEM4Configurator() {
             TextField(
                 value = "",
                 onValueChange = {
-                    ""
+                    //todo change value
                 },
                 maxLines = 1,
             )

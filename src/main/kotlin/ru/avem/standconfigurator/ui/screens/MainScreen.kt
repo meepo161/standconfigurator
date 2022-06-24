@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view
+package ru.avem.standconfigurator.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -14,8 +14,10 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import ru.avem.standconfigurator.model.blob.Project
 import ru.avem.standconfigurator.model.devices.Device
-import ru.avem.standconfigurator.view.devices.avem4.AVEM4Configurator
-import ru.avem.standconfigurator.view.devices.latr.LatrConfigurator
+import ru.avem.standconfigurator.ui.composables.DevicesList
+import ru.avem.standconfigurator.ui.composables.TestsList
+import ru.avem.standconfigurator.ui.devices.avem4.AVEM4Configurator
+import ru.avem.standconfigurator.ui.devices.latr.LatrConfigurator
 
 class MainScreen(private val currentProject: Project) : Screen {
     @Composable
@@ -105,11 +107,11 @@ class MainScreen(private val currentProject: Project) : Screen {
             ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(.1f)) {
-                        Tests(modifier = Modifier.fillMaxHeight(.5f)) {
+                        TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
 //                            textCenter = it
                         }
                         Divider()
-                        Devices(modifier = Modifier.fillMaxHeight(.5f)) {
+                        DevicesList(modifier = Modifier.fillMaxHeight(.5f)) {
                             selectedDevice = it
                             scope.launch {
                                 rtlDrawer.open()
@@ -120,11 +122,11 @@ class MainScreen(private val currentProject: Project) : Screen {
 
                     }
                     Column(modifier = Modifier.weight(.1f)) {
-                        Tests(modifier = Modifier.fillMaxHeight(.5f)) {
+                        TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
 //                            textCenter = it
                         }
                         Divider()
-                        Devices(modifier = Modifier.fillMaxHeight(.5f)) {
+                        DevicesList(modifier = Modifier.fillMaxHeight(.5f)) {
                             selectedDevice = it
                         }
                     }

@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view.devices.latr
+package ru.avem.standconfigurator.ui.devices.latr
 
 import androidx.compose.runtime.mutableStateOf
 
@@ -13,6 +13,7 @@ class LatrConfigurationViewModel(model: LatrConfigurationModel) {
     var wantedVoltagePerSecond = mutableStateOf(model.wantedVoltagePerSecond.toString())
     var regulationTimeout = mutableStateOf(model.regulationTimeout.toString())
 
+    @Suppress("unused")
     fun buildModel(): LatrConfigurationModel {
         return LatrConfigurationModel(
             count = count.value.toInt(),
