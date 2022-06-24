@@ -1,9 +1,12 @@
 package ru.avem.standconfigurator.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.PlusOne
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,9 +15,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import ru.avem.standconfigurator.model.blob.LogicItem
 import ru.avem.standconfigurator.model.blob.Project
 import ru.avem.standconfigurator.model.devices.Device
 import ru.avem.standconfigurator.ui.composables.DevicesList
+import ru.avem.standconfigurator.ui.composables.LogicListItem
 import ru.avem.standconfigurator.ui.composables.TestsList
 import ru.avem.standconfigurator.ui.devices.avem4.AVEM4Configurator
 import ru.avem.standconfigurator.ui.devices.latr.LatrConfigurator
@@ -28,7 +33,9 @@ class MainScreen(private val currentProject: Project) : Screen {
         val scope = rememberCoroutineScope()
         var selectedDevice: Device? by remember { mutableStateOf(null) }
         val rtlDrawer = rememberDrawerState(DrawerValue.Closed)
+        val logicItemsList = remember { mutableStateListOf<LogicItem>(*emptyArray()) }
 
+        val logicItemsScrollState = rememberLazyListState()
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -105,7 +112,7 @@ class MainScreen(private val currentProject: Project) : Screen {
                 },
                 drawerState = rtlDrawer
             ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth().padding(bottom = 56.dp)) {
                     Column(modifier = Modifier.weight(.1f)) {
                         TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
 //                            textCenter = it
@@ -118,8 +125,24 @@ class MainScreen(private val currentProject: Project) : Screen {
                             }
                         }
                     }
-                    Surface(modifier = Modifier.weight(.8f)) {
-
+                    LazyColumn(modifier = Modifier.weight(.8f).padding(16.dp), state = logicItemsScrollState) {
+                        items(logicItemsList.size) {
+                            LogicListItem {
+                                Text(logicItemsList[it].mockedParameter)
+                            }
+                        }
+                        item {
+                            LogicListItem {
+                                IconButton(onClick = {
+                                    logicItemsList.add(LogicItem("NIGGER"))
+                                    scope.launch {
+                                        logicItemsScrollState.scrollToItem(logicItemsList.size - 1)
+                                    }
+                                }) {
+                                    Icon(Icons.Filled.PlusOne, contentDescription = null)
+                                }
+                            }
+                        }
                     }
                     Column(modifier = Modifier.weight(.1f)) {
                         TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
