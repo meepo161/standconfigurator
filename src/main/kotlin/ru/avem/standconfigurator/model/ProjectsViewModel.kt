@@ -15,4 +15,6 @@ class ProjectsViewModel {
         ProjectRepository.remove(project)
         projects.remove(project)
     }
+
+    fun getFilteredProjects(predicate: String): List<Project> = projects.filter { it.name.contains(predicate) }
 }

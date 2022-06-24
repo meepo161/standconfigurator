@@ -1,189 +1,81 @@
 package ru.avem.standconfigurator.view
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
-import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
-import org.jetbrains.compose.splitpane.HorizontalSplitPane
-import org.jetbrains.compose.splitpane.VerticalSplitPane
-import org.jetbrains.compose.splitpane.rememberSplitPaneState
-import ru.avem.standconfigurator.Devices
 import ru.avem.standconfigurator.model.blob.Project
+import ru.avem.standconfigurator.model.devices.Device
+import ru.avem.standconfigurator.view.devices.avem4.AVEM4Configurator
+import ru.avem.standconfigurator.view.devices.latr.LatrConfigurator
 
-@OptIn(ExperimentalSplitPaneApi::class)
 class MainScreen(private val currentProject: Project) : Screen {
     @Composable
-    @Preview
     override fun Content() {
         val localNavigator = LocalNavigator.currentOrThrow
+
         var isTopBarMenuExpanded by remember { mutableStateOf(false) }
-        val scaffoldState = rememberScaffoldState()
         val scope = rememberCoroutineScope()
+        var selectedDevice: Device? by remember { mutableStateOf(null) }
+        val rtlDrawer = rememberDrawerState(DrawerValue.Closed)
 
         Scaffold(
-            scaffoldState = scaffoldState,
             topBar = {
-                TopAppBar {
-                    Button(onClick = { isTopBarMenuExpanded = true }) {
-                        Text("Файл")
-                    }
-                    DropdownMenu(expanded = isTopBarMenuExpanded, onDismissRequest = { isTopBarMenuExpanded = false }) {
-                        DropdownMenuItem(onClick = {
-                        }) {
-                            Column {
-                                Button(
-                                    onClick = {
-                                        scope.launch {
-                                            isTopBarMenuExpanded = false
-                                            scaffoldState.snackbarHostState.showSnackbar("Для создания нового проекта вернитесь в меню проектов")
+                TopAppBar(
+                    title = {
+                        Row {
+                            Button(onClick = { isTopBarMenuExpanded = true }) {
+                                Text("Файл")
+                            }
+                            DropdownMenu(
+                                expanded = isTopBarMenuExpanded,
+                                onDismissRequest = { isTopBarMenuExpanded = false }) {
+                                DropdownMenuItem(onClick = {
+                                }) {
+                                    Column {
+                                        Button(
+                                            onClick = {
+                                                scope.launch {
+                                                    isTopBarMenuExpanded = false
+                                                    localNavigator.pop()
+                                                }
+                                            }) {
+                                            Text("Новый")
                                         }
-                                    }) {
-                                    Text("Новый")
-                                }
-                                Button(
-                                    onClick = {
-                                        localNavigator.push(LoginScreen())
-                                    }) {
-                                    Text("Выход")
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-
-            content = {
-                val splitPaneState = rememberSplitPaneState(0.3f)
-                val splitPaneState2 = rememberSplitPaneState(0.7f)
-                val verticalSplitPaneState = rememberSplitPaneState(0.5f)
-
-                var textCenter by remember { mutableStateOf("") }
-                var textRight by remember { mutableStateOf("") }
-
-                HorizontalSplitPane(splitPaneState = splitPaneState) {
-                    first {
-                        VerticalSplitPane(
-                            splitPaneState = verticalSplitPaneState,
-                            modifier = Modifier.background(Color.Gray)
-                        ) {
-                            first {
-                                Tests {
-                                    textCenter = it
-                                }
-                            }
-                            second {
-                                Devices {
-                                    textRight = it
-                                }
-                            }
-                            splitter {
-                                visiblePart {
-                                    Box(
-                                        Modifier
-                                            .height(1.dp)
-                                            .fillMaxWidth()
-                                    )
-                                }
-                                handle {
-                                    Box(
-                                        Modifier
-                                            .markAsHandle()
-                                            .cursorForVerticalResize()
-                                            .height(8.dp)
-                                            .fillMaxWidth()
-                                    ) {
-                                        Box(Modifier.background(Color.Blue).height(1.dp).fillMaxWidth()) {
+                                        Button(
+                                            onClick = {
+                                                localNavigator.push(LoginScreen())
+                                            }) {
+                                            Text("Выйти")
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                    second {
-                        HorizontalSplitPane(splitPaneState = splitPaneState2) {
-                            first {
-                                Column(
-                                    modifier = Modifier.fillMaxHeight().fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.TopCenter) {
-                                        Text(textCenter)
+                    },
+                    actions = {
+                        if (rtlDrawer.isOpen) {
+                            IconButton(
+                                onClick = {
+                                    scope.launch {
+                                        rtlDrawer.close()
                                     }
                                 }
-                            }
-                            second {
-                                Column(
-                                    modifier = Modifier.fillMaxHeight().fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Box(contentAlignment = Alignment.TopCenter) {
-                                        Text(textRight)
-                                    }
-                                }
-                            }
-                            splitter {
-                                visiblePart {
-                                    Box(
-                                        Modifier
-                                            .width(1.dp)
-                                            .fillMaxHeight()
-                                            .background(MaterialTheme.colors.background)
-                                    )
-                                }
-                                handle {
-                                    Box(
-                                        Modifier
-                                            .markAsHandle()
-                                            .cursorForHorizontalResize()
-                                            .width(16.dp)
-                                            .fillMaxHeight(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Box(Modifier.background(Color.Blue).width(1.dp).fillMaxHeight()) {
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    splitter {
-                        visiblePart {
-                            Box(
-                                Modifier
-                                    .width(1.dp)
-                                    .fillMaxHeight()
-                                    .background(MaterialTheme.colors.background)
-                            )
-                        }
-                        handle {
-                            Box(
-                                Modifier
-                                    .markAsHandle()
-                                    .cursorForHorizontalResize()
-                                    .width(16.dp)
-                                    .fillMaxHeight(),
-                                contentAlignment = Alignment.Center
                             ) {
-                                Box(Modifier.background(Color.Blue).width(1.dp).fillMaxHeight()) {
-                                }
+                                Icon(Icons.Filled.ArrowBack, contentDescription = null)
                             }
                         }
                     }
-                }
+                )
             },
-
             bottomBar = {
                 BottomAppBar {
                     Box(
@@ -194,7 +86,50 @@ class MainScreen(private val currentProject: Project) : Screen {
                     }
                 }
             }
+        ) {
+            ModalDrawer(
+                gesturesEnabled = false,
+                drawerContent = {
+                    Column(
+                        modifier = Modifier.fillMaxHeight().fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        when (selectedDevice?.type) {
+                            "ЛАТР" -> LatrConfigurator()
+                            "АВЭМ4" -> AVEM4Configurator()
+                        }
+                    }
+                },
+                drawerState = rtlDrawer
+            ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.weight(.1f)) {
+                        Tests(modifier = Modifier.fillMaxHeight(.5f)) {
+//                            textCenter = it
+                        }
+                        Divider()
+                        Devices(modifier = Modifier.fillMaxHeight(.5f)) {
+                            selectedDevice = it
+                            scope.launch {
+                                rtlDrawer.open()
+                            }
+                        }
+                    }
+                    Surface(modifier = Modifier.weight(.8f)) {
 
-        )
+                    }
+                    Column(modifier = Modifier.weight(.1f)) {
+                        Tests(modifier = Modifier.fillMaxHeight(.5f)) {
+//                            textCenter = it
+                        }
+                        Divider()
+                        Devices(modifier = Modifier.fillMaxHeight(.5f)) {
+                            selectedDevice = it
+                        }
+                    }
+                }
+            }
+        }
     }
 }

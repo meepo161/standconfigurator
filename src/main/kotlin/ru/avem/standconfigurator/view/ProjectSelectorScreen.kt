@@ -21,11 +21,10 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import kotlinx.coroutines.launch
 import ru.avem.standconfigurator.model.MainModel
-import ru.avem.standconfigurator.model.ProjectRepository
 import ru.avem.standconfigurator.model.ProjectsViewModel
 import ru.avem.standconfigurator.model.blob.Project
+import ru.avem.standconfigurator.view.widgets.TableView
 import java.text.SimpleDateFormat
 
 class ProjectSelectorScreen : Screen {
@@ -36,7 +35,6 @@ class ProjectSelectorScreen : Screen {
         val localNavigator = LocalNavigator.currentOrThrow
         val focusManager = LocalFocusManager.current
         val pvm = ProjectsViewModel()
-        var filteredProjects by remember { mutableStateOf(listOf(*pvm.projects.toTypedArray())) }
 
         var isNewProjectDialogVisible by remember { mutableStateOf(false) }
         val scaffoldState = rememberScaffoldState()
@@ -48,7 +46,7 @@ class ProjectSelectorScreen : Screen {
         var template by remember { mutableStateOf(TextFieldValue("1")) }
         var filterValue by remember { mutableStateOf("") }
         var projectNameErrorState by remember { mutableStateOf(false) }
-        var currentProject by remember { mutableStateOf(filteredProjects.firstOrNull()) }
+        var currentProject by remember { mutableStateOf<Project?>(null) }
 
         @OptIn(ExperimentalMaterialApi::class)
         @Composable
@@ -178,7 +176,6 @@ class ProjectSelectorScreen : Screen {
                                 if (projectNameErrorState) {
                                     projectNameErrorState = false
                                 }
-                                filteredProjects = pvm.projects.filter { it.name.contains(newText) }
                                 filterValue = newText
                                 currentProject = null
                             },
@@ -194,50 +191,68 @@ class ProjectSelectorScreen : Screen {
                             }) {
                             Text("Новый")
                         }
-                        Button(
-                            modifier = Modifier.height(56.dp),
-                            onClick = {
-                                if (currentProject != null) {
-                                    localNavigator.push(MainScreen(currentProject!!))
-                                } else {
-                                    scope.launch {
-                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
-                                    }
-                                }
-                            }) {
-                            Text("Открыть")
-                        }
-                        Button(
-                            modifier = Modifier.height(56.dp),
-                            onClick = {
-                                if (currentProject != null) {
-                                    pvm.remove(currentProject!!)
-                                    currentProject = null
-                                } else {
-                                    scope.launch {
-                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
-                                    }
-                                }
-                            }) {
-                            Text("Удалить")
-                        }
+//                        Button(
+//                            modifier = Modifier.height(56.dp),
+//                            onClick = {
+//                                if (currentProject != null) {
+//                                    localNavigator.push(MainScreenNew(currentProject!!))
+//                                } else {
+//                                    scope.launch {
+//                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
+//                                    }
+//                                }
+//                            }) {
+//                            Text("Открыть")
+//                        }
+//                        Button(
+//                            modifier = Modifier.height(56.dp),
+//                            onClick = {
+//                                if (currentProject != null) {
+//                                    pvm.remove(currentProject!!)
+//                                    currentProject = null
+//                                } else {
+//                                    scope.launch {
+//                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
+//                                    }
+//                                }
+//                            }) {
+//                            Text("Удалить")
+//                        }
                     }
                     Spacer(Modifier.size(16.dp))
                     TableView(
-                        filteredProjects,
-                        listOf(
+                        selectedItem = currentProject,
+                        items = pvm.getFilteredProjects(filterValue),
+                        columns = listOf(
                             Project::name,
                             Project::date,
                             Project::author,
                         ),
-                        listOf(
+                        columnNames = listOf(
                             "Название",
                             "Дата",
                             "Автор",
-                        )
-                    ) {
-                        currentProject = ProjectRepository.projects[it]
-                    }
+                        ),
+                        onItemPrimaryPressed = {
+                            localNavigator.push(MainScreen(pvm.getFilteredProjects(filterValue)[it]))
+                        },
+                        onItemSecondaryPressed = {
+                            currentProject = pvm.getFilteredProjects(filterValue)[it]
+                        },
+                        contextMenuContent = {
+                            DropdownMenuItem(onClick = {
+                                localNavigator.push(MainScreen(currentProject!!))
+                            }) {
+                                Text("Открыть")
+                            }
+                            DropdownMenuItem(onClick = {
+                                pvm.remove(currentProject!!)
+                                currentProject = null
+                            }) {
+                                Text("Удалить")
+                            }
+                        }
+                    )
                 }
             },
 

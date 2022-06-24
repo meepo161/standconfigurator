@@ -13,9 +13,6 @@ version = "0.0001a"
 
 repositories {
     jcenter()
-    flatDir {
-        dir("libs")
-    }
     mavenCentral()
     maven { url = uri("https://maven.pkg.jetbrains.space/public/p/compose/dev") }
 }
@@ -27,10 +24,10 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-tab-navigator:1.0.0-rc02")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.6.10")
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation("org.jetbrains.compose.material:material-icons-extended-desktop:1.1.1")
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "15"
 }
 

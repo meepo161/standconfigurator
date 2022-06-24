@@ -1,8 +1,9 @@
-package ru.avem.standconfigurator.view
+package ru.avem.standconfigurator.view.widgets
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -10,6 +11,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.isPrimaryPressed
+import androidx.compose.ui.input.pointer.isSecondaryPressed
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -17,17 +20,18 @@ import androidx.compose.ui.unit.sp
 import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> TableView(
+    selectedItem: T?,
     items: List<T>,
     columns: List<KProperty1<T, Any>>,
     columnNames: List<String> = emptyList(),
-    onItemSelect: (Int) -> Unit
+    onItemPrimaryPressed: (Int) -> Unit,
+    onItemSecondaryPressed: (Int) -> Unit,
+    contextMenuContent: @Composable () -> Unit,
 ) {
-    var selectedIndex by remember {
-        mutableStateOf(0)
-    }
-
+    var isShowDropdownMenu by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 60.dp)) {
         Row {
             if (columnNames.size == columns.size) {
@@ -57,13 +61,20 @@ fun <T> TableView(
                 }
             }
         }
+
         items.forEachIndexed { i, item ->
             Row(
-                modifier = Modifier.clickable(onClick = {
-                    selectedIndex = i
-                    onItemSelect(i)
-                }).background(
-                    if (selectedIndex == i) {
+                modifier = Modifier.mouseClickable(
+                    onClick = {
+                        if (buttons.isPrimaryPressed) {
+                            onItemPrimaryPressed(i)
+                        } else if (buttons.isSecondaryPressed) {
+                            onItemSecondaryPressed(i)
+                            isShowDropdownMenu = true
+                        }
+                    }
+                ).background(
+                    if (selectedItem == item) {
                         MaterialTheme.colors.secondary
                     } else {
                         MaterialTheme.colors.background
@@ -81,7 +92,16 @@ fun <T> TableView(
                             .weight(0.3f).height(48.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(text = field, fontSize = 30.sp, color = if (selectedIndex == i) Color.White else MaterialTheme.colors.onSurface)
+                        Text(
+                            text = field,
+                            fontSize = 30.sp,
+                            color = if (selectedItem == item) Color.White else MaterialTheme.colors.onSurface
+                        )
+                    }
+                }
+                if (selectedItem == item) {
+                    DropdownMenu(expanded = isShowDropdownMenu, onDismissRequest = { isShowDropdownMenu = false }) {
+                        contextMenuContent()
                     }
                 }
             }

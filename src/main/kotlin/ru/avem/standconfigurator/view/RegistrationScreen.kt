@@ -5,7 +5,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -129,7 +129,7 @@ class RegistrationScreen : Screen {
                         passwordVisibility = !passwordVisibility
                     }) {
                         Icon(
-                            imageVector = if (passwordVisibility) Icons.Default.Face else Icons.Default.Clear,
+                            imageVector = if (passwordVisibility) Icons.Default.RemoveRedEye else Icons.Default.Clear,
                             contentDescription = "visibility",
                             tint = MaterialTheme.colors.primary
                         )
@@ -166,7 +166,7 @@ class RegistrationScreen : Screen {
                         cPasswordVisibility = !cPasswordVisibility
                     }) {
                         Icon(
-                            imageVector = if (cPasswordVisibility) Icons.Default.Face else Icons.Default.Clear,
+                            imageVector = if (cPasswordVisibility) Icons.Default.RemoveRedEye else Icons.Default.Clear,
                             contentDescription = "visibility",
                             tint = MaterialTheme.colors.primary
                         )
