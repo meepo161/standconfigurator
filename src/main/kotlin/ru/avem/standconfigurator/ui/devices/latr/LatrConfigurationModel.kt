@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view.devices.latr
+package ru.avem.standconfigurator.ui.devices.latr
 
 class LatrConfigurationModel(
     val count: Int,

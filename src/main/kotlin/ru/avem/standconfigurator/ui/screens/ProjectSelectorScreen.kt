@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view
+package ru.avem.standconfigurator.ui.screens
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
@@ -24,9 +24,12 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import ru.avem.standconfigurator.model.MainModel
 import ru.avem.standconfigurator.model.ProjectsViewModel
 import ru.avem.standconfigurator.model.blob.Project
-import ru.avem.standconfigurator.view.widgets.TableView
+import ru.avem.standconfigurator.ui.keyEventNext
+import ru.avem.standconfigurator.ui.keyboardActionNext
+import ru.avem.standconfigurator.ui.composables.TableView
 import java.text.SimpleDateFormat
 
+@Suppress("OPT_IN_IS_NOT_ENABLED")
 class ProjectSelectorScreen : Screen {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
@@ -38,7 +41,6 @@ class ProjectSelectorScreen : Screen {
 
         var isNewProjectDialogVisible by remember { mutableStateOf(false) }
         val scaffoldState = rememberScaffoldState()
-        val scope = rememberCoroutineScope()
 
         var name by remember { mutableStateOf(TextFieldValue("1")) }
         var projectErrorState by remember { mutableStateOf(false) }
@@ -191,33 +193,6 @@ class ProjectSelectorScreen : Screen {
                             }) {
                             Text("Новый")
                         }
-//                        Button(
-//                            modifier = Modifier.height(56.dp),
-//                            onClick = {
-//                                if (currentProject != null) {
-//                                    localNavigator.push(MainScreenNew(currentProject!!))
-//                                } else {
-//                                    scope.launch {
-//                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
-//                                    }
-//                                }
-//                            }) {
-//                            Text("Открыть")
-//                        }
-//                        Button(
-//                            modifier = Modifier.height(56.dp),
-//                            onClick = {
-//                                if (currentProject != null) {
-//                                    pvm.remove(currentProject!!)
-//                                    currentProject = null
-//                                } else {
-//                                    scope.launch {
-//                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
-//                                    }
-//                                }
-//                            }) {
-//                            Text("Удалить")
-//                        }
                     }
                     Spacer(Modifier.size(16.dp))
                     TableView(

@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view.devices.latr
+package ru.avem.standconfigurator.ui.devices.latr
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,7 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.avem.standconfigurator.formatRealNumber
-import ru.avem.standconfigurator.view.widgets.ComboBox
+import ru.avem.standconfigurator.ui.composables.ComboBox
 
 @Composable
 fun LatrConfigurator(configurationModel: LatrConfigurationViewModel = LatrConfigurationViewModel(

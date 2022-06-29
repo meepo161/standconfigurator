@@ -1,4 +1,6 @@
-package ru.avem.standconfigurator.view.widgets
+@file:Suppress("OPT_IN_IS_NOT_ENABLED")
+
+package ru.avem.standconfigurator.ui.composables
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

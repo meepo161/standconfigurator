@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view
+package ru.avem.standconfigurator.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -27,6 +27,8 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ru.avem.standconfigurator.model.MainModel
 import ru.avem.standconfigurator.model.UsersRepository
+import ru.avem.standconfigurator.ui.keyEventNext
+import ru.avem.standconfigurator.ui.keyboardActionNext
 
 class LoginScreen : Screen {
     @Composable

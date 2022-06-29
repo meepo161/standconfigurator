@@ -1,6 +1,8 @@
-package ru.avem.standconfigurator.view
+package ru.avem.standconfigurator.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -12,10 +14,16 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.blob.LogicItem
 import ru.avem.standconfigurator.model.blob.Project
-import ru.avem.standconfigurator.model.devices.Device
-import ru.avem.standconfigurator.view.devices.avem4.AVEM4Configurator
-import ru.avem.standconfigurator.view.devices.latr.LatrConfigurator
+import ru.avem.standconfigurator.model.blob.Device
+import ru.avem.standconfigurator.model.blob.Test
+import ru.avem.standconfigurator.ui.composables.DevicesList
+import ru.avem.standconfigurator.ui.composables.LogicListItem
+import ru.avem.standconfigurator.ui.composables.TestsList
+import ru.avem.standconfigurator.ui.devices.avem4.AVEM4Configurator
+import ru.avem.standconfigurator.ui.devices.latr.LatrConfigurator
 
 class MainScreen(private val currentProject: Project) : Screen {
     @Composable
@@ -24,9 +32,11 @@ class MainScreen(private val currentProject: Project) : Screen {
 
         var isTopBarMenuExpanded by remember { mutableStateOf(false) }
         val scope = rememberCoroutineScope()
+        var selectedTest: Test by remember { mutableStateOf(MainModel.testsList.first()) }
         var selectedDevice: Device? by remember { mutableStateOf(null) }
         val rtlDrawer = rememberDrawerState(DrawerValue.Closed)
 
+        val logicItemsScrollState = rememberLazyListState()
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -95,7 +105,7 @@ class MainScreen(private val currentProject: Project) : Screen {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        when (selectedDevice?.type) {
+                        when (selectedDevice?.text) {
                             "ЛАТР" -> LatrConfigurator()
                             "АВЭМ4" -> AVEM4Configurator()
                         }
@@ -103,31 +113,48 @@ class MainScreen(private val currentProject: Project) : Screen {
                 },
                 drawerState = rtlDrawer
             ) {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Row(modifier = Modifier.fillMaxWidth().padding(bottom = 56.dp)) {
                     Column(modifier = Modifier.weight(.1f)) {
-                        Tests(modifier = Modifier.fillMaxHeight(.5f)) {
-//                            textCenter = it
+                        TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
+                            selectedTest = it
                         }
                         Divider()
-                        Devices(modifier = Modifier.fillMaxHeight(.5f)) {
+                        DevicesList(modifier = Modifier.fillMaxHeight(.5f)) {
                             selectedDevice = it
                             scope.launch {
                                 rtlDrawer.open()
                             }
                         }
                     }
-                    Surface(modifier = Modifier.weight(.8f)) {
-
-                    }
-                    Column(modifier = Modifier.weight(.1f)) {
-                        Tests(modifier = Modifier.fillMaxHeight(.5f)) {
-//                            textCenter = it
+                    LazyColumn(modifier = Modifier.weight(.8f).padding(16.dp), state = logicItemsScrollState) {
+                        items(selectedTest.logics.size) {
+                            LogicListItem {
+                                Text(selectedTest.logics[it].mockedParameter)
+                            }
                         }
-                        Divider()
-                        Devices(modifier = Modifier.fillMaxHeight(.5f)) {
-                            selectedDevice = it
+                        item {
+                            LogicListItem {
+                                TextButton(onClick = {
+                                    selectedTest.logics.add(LogicItem("Комментарий"))
+                                    scope.launch {
+                                        logicItemsScrollState.scrollToItem(selectedTest.logics.size - 1)
+                                    }
+                                }) {
+                                    Text("Добавить инструкцию")
+                                }
+                            }
                         }
                     }
+//                    Column(modifier = Modifier.weight(.1f)) {
+//                        TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
+//                            selectedTest = it
+//                            lvm = LogicsViewModel(selectedTest?.logics)
+//                        }
+//                        Divider()
+//                        DevicesList(modifier = Modifier.fillMaxHeight(.5f)) {
+//                            selectedDevice = it
+//                        }
+//                    }
                 }
             }
         }

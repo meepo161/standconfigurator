@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view.widgets
+package ru.avem.standconfigurator.ui.composables
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
