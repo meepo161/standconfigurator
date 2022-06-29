@@ -1,47 +1,23 @@
 package ru.avem.standconfigurator.ui.composables
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.blob.Test
 
 @Composable
-fun TestsList(modifier: Modifier = Modifier, onClick: (String) -> Unit) {
-    val stateFlagList = mutableStateListOf<Boolean>()
-    for (i in 0..50) {
-        stateFlagList.add(false)
-    }
-    val testsState by rememberSaveable {
-        mutableStateOf(stateFlagList)
-    }
-
+fun TestsList(modifier: Modifier = Modifier, onClick: (Test) -> Unit) {
+    var selectedTest by remember { mutableStateOf<Test?>(null) }
     LazyColumn(
-        modifier = modifier
+        modifier = modifier,
     ) {
-        items((1..50).toList()) {
-            TextButton(
-                modifier = Modifier.background(if (testsState[it]) Color.Cyan else Color.White).fillMaxWidth(),
-                onClick = {
-                    for (i in 0..50) {
-                        testsState[i] = false
-                    }
-                    testsState[it] = !testsState[it]
-                    onClick("Опыт $it")
-                }) {
-                Text(
-                    modifier = Modifier
-                        .background(if (testsState[it]) Color.Cyan else Color.White),
-                    text = "Опыт $it"
-                )
+        repeat(MainModel.testsList.size) { testIdx ->
+            item {
+                ListItem(item = MainModel.testsList[testIdx], selectedTest) {
+                    onClick(it)
+                    selectedTest = it
+                }
             }
         }
     }

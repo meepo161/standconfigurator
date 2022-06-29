@@ -193,33 +193,6 @@ class ProjectSelectorScreen : Screen {
                             }) {
                             Text("Новый")
                         }
-//                        Button(
-//                            modifier = Modifier.height(56.dp),
-//                            onClick = {
-//                                if (currentProject != null) {
-//                                    localNavigator.push(MainScreenNew(currentProject!!))
-//                                } else {
-//                                    scope.launch {
-//                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
-//                                    }
-//                                }
-//                            }) {
-//                            Text("Открыть")
-//                        }
-//                        Button(
-//                            modifier = Modifier.height(56.dp),
-//                            onClick = {
-//                                if (currentProject != null) {
-//                                    pvm.remove(currentProject!!)
-//                                    currentProject = null
-//                                } else {
-//                                    scope.launch {
-//                                        scaffoldState.snackbarHostState.showSnackbar("Проект не выбран")
-//                                    }
-//                                }
-//                            }) {
-//                            Text("Удалить")
-//                        }
                     }
                     Spacer(Modifier.size(16.dp))
                     TableView(

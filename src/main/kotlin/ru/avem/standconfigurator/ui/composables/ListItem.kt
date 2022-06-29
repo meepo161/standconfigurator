@@ -7,19 +7,19 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import ru.avem.standconfigurator.model.devices.Device
+import ru.avem.standconfigurator.model.IListItem
 
 @Composable
-fun DeviceListItem(device: Device, selectedDevice: Device?, onClick: (Device) -> Unit) {
+fun <T : IListItem> ListItem(item: T, selectedItem: T?, onClick: (T) -> Unit) {
     TextButton(
-        modifier = Modifier.background(if (selectedDevice == device) Color.Cyan else Color.White).fillMaxWidth(),
+        modifier = Modifier.background(if (selectedItem == item) Color.Cyan else Color.White).fillMaxWidth(),
         onClick = {
-            onClick(device)
+            onClick(item)
         }) {
         Text(
             modifier = Modifier
-                .background(if (selectedDevice == device) Color.Cyan else Color.White),
-            text = device.type
+                .background(if (selectedItem == item) Color.Cyan else Color.White),
+            text = item.text
         )
     }
 }

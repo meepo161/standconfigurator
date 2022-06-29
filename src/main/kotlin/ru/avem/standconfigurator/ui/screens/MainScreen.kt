@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.PlusOne
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,9 +14,11 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
+import ru.avem.standconfigurator.model.MainModel
 import ru.avem.standconfigurator.model.blob.LogicItem
 import ru.avem.standconfigurator.model.blob.Project
-import ru.avem.standconfigurator.model.devices.Device
+import ru.avem.standconfigurator.model.blob.Device
+import ru.avem.standconfigurator.model.blob.Test
 import ru.avem.standconfigurator.ui.composables.DevicesList
 import ru.avem.standconfigurator.ui.composables.LogicListItem
 import ru.avem.standconfigurator.ui.composables.TestsList
@@ -31,9 +32,9 @@ class MainScreen(private val currentProject: Project) : Screen {
 
         var isTopBarMenuExpanded by remember { mutableStateOf(false) }
         val scope = rememberCoroutineScope()
+        var selectedTest: Test by remember { mutableStateOf(MainModel.testsList.first()) }
         var selectedDevice: Device? by remember { mutableStateOf(null) }
         val rtlDrawer = rememberDrawerState(DrawerValue.Closed)
-        val logicItemsList = remember { mutableStateListOf<LogicItem>(*emptyArray()) }
 
         val logicItemsScrollState = rememberLazyListState()
         Scaffold(
@@ -104,7 +105,7 @@ class MainScreen(private val currentProject: Project) : Screen {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        when (selectedDevice?.type) {
+                        when (selectedDevice?.text) {
                             "ЛАТР" -> LatrConfigurator()
                             "АВЭМ4" -> AVEM4Configurator()
                         }
@@ -115,7 +116,7 @@ class MainScreen(private val currentProject: Project) : Screen {
                 Row(modifier = Modifier.fillMaxWidth().padding(bottom = 56.dp)) {
                     Column(modifier = Modifier.weight(.1f)) {
                         TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
-//                            textCenter = it
+                            selectedTest = it
                         }
                         Divider()
                         DevicesList(modifier = Modifier.fillMaxHeight(.5f)) {
@@ -126,33 +127,34 @@ class MainScreen(private val currentProject: Project) : Screen {
                         }
                     }
                     LazyColumn(modifier = Modifier.weight(.8f).padding(16.dp), state = logicItemsScrollState) {
-                        items(logicItemsList.size) {
+                        items(selectedTest.logics.size) {
                             LogicListItem {
-                                Text(logicItemsList[it].mockedParameter)
+                                Text(selectedTest.logics[it].mockedParameter)
                             }
                         }
                         item {
                             LogicListItem {
-                                IconButton(onClick = {
-                                    logicItemsList.add(LogicItem("NIGGER"))
+                                TextButton(onClick = {
+                                    selectedTest.logics.add(LogicItem("Комментарий"))
                                     scope.launch {
-                                        logicItemsScrollState.scrollToItem(logicItemsList.size - 1)
+                                        logicItemsScrollState.scrollToItem(selectedTest.logics.size - 1)
                                     }
                                 }) {
-                                    Icon(Icons.Filled.PlusOne, contentDescription = null)
+                                    Text("Добавить инструкцию")
                                 }
                             }
                         }
                     }
-                    Column(modifier = Modifier.weight(.1f)) {
-                        TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
-//                            textCenter = it
-                        }
-                        Divider()
-                        DevicesList(modifier = Modifier.fillMaxHeight(.5f)) {
-                            selectedDevice = it
-                        }
-                    }
+//                    Column(modifier = Modifier.weight(.1f)) {
+//                        TestsList(modifier = Modifier.fillMaxHeight(.5f)) {
+//                            selectedTest = it
+//                            lvm = LogicsViewModel(selectedTest?.logics)
+//                        }
+//                        Divider()
+//                        DevicesList(modifier = Modifier.fillMaxHeight(.5f)) {
+//                            selectedDevice = it
+//                        }
+//                    }
                 }
             }
         }

@@ -38,12 +38,6 @@ private val semibold =
 
 val craneFontFamily = FontFamily(fonts = listOf(light, regular, medium, semibold))
 
-val captionTextStyle = TextStyle(
-    fontFamily = craneFontFamily,
-    fontWeight = FontWeight.W400,
-    fontSize = 16.sp
-)
-
 val craneTypography = Typography(
     h1 = TextStyle(
         fontFamily = craneFontFamily,
