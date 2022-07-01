@@ -1,8 +1,6 @@
 package ru.avem.standconfigurator.model.blob
 
-import kotlinx.serialization.Serializable
-
-@Serializable
+@kotlinx.serialization.Serializable
 data class User(
     val name: String = "",
     val login: String = "",

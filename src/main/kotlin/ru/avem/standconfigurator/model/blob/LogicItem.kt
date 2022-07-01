@@ -1,4 +1,4 @@
 package ru.avem.standconfigurator.model.blob
 
-//todo fill constructor
-data class LogicItem(val mockedParameter: String)
+@kotlinx.serialization.Serializable
+data class LogicItem(val text: String)

@@ -10,10 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun LogicListItem(content: @Composable () -> Unit) {
+fun CardListItem(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Card(elevation = 4.dp, modifier = Modifier.padding(8.dp)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.Center
+            modifier = modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.Center
         ) {
             content()
         }
