@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.FrameWindowScope
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -42,6 +43,7 @@ class LoginScreen : Screen {
         var password by remember { mutableStateOf(TextFieldValue("1")) }
 
         val users = UsersRepository.users
+
         Scaffold(
             content = {
                 Column(

@@ -1,10 +1,16 @@
 package ru.avem.standconfigurator.model
 
-import ru.avem.standconfigurator.model.blob.Test
+import androidx.compose.runtime.mutableStateOf
+import ru.avem.standconfigurator.model.blob.Device
+import ru.avem.standconfigurator.model.blob.Project
 import ru.avem.standconfigurator.model.blob.User
 
 object MainModel {
-    val testsList = listOf(Test("Опыт 1"), Test("Опыт 2"))
+    var isOpen = mutableStateOf(true)
+
     lateinit var currentUser: User
-    val devicesList = listOf("АВЭМ4", "ЛАТР", "ПР200", "ПР102")
+
+    lateinit var currentProject: Project
+
+    val allDevices = listOf("АВЭМ4", "ЛАТР", "ПР200", "ПР102").map(::Device).toMutableList()
 }
