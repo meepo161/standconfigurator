@@ -4,26 +4,29 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import cafe.adriel.voyager.navigator.Navigator
 import ru.avem.standconfigurator.model.MainModel
-import ru.avem.standconfigurator.model.ProjectRepository
-import ru.avem.standconfigurator.model.UsersRepository
-import ru.avem.standconfigurator.ui.screens.LoginScreen
+import ru.avem.standconfigurator.model.repos.ProjectRepository
+import ru.avem.standconfigurator.model.repos.UsersRepository
+import ru.avem.standconfigurator.view.craneTypography
+import ru.avem.standconfigurator.view.screens.auth.LoginScreen
 
 fun main() = application {
-    val isOpen = remember { mutableStateOf(true) }
-
     UsersRepository.init()
     ProjectRepository.init()
-    MainModel.isOpen = isOpen
-    if (isOpen.value) {
+
+    MainModel.isOpen = remember { mutableStateOf(true) }
+    if (MainModel.isOpen.value) {
         Window(
             resizable = false,
             undecorated = true,
             state = rememberWindowState(placement = WindowPlacement.Maximized),
             onCloseRequest = ::exitApplication,
-            title = "Конфигуратор стендов"
+            title = "Конфигуратор промышленных стендов"
         ) {
             MaterialTheme(
                 typography = craneTypography,
