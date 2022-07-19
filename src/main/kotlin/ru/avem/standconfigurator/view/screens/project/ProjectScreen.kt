@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.OfflineBolt
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.OnlinePrediction
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,8 +38,10 @@ import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
 import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.repos.ProjectRepository
 import ru.avem.standconfigurator.model.structs.LogicItem
 import ru.avem.standconfigurator.model.structs.Project
+import ru.avem.standconfigurator.model.structs.Test
 import ru.avem.standconfigurator.view.composables.CardListItem
 import ru.avem.standconfigurator.view.composables.LazyList
 import ru.avem.standconfigurator.view.keyEventNext
@@ -53,6 +56,8 @@ class ProjectScreen(private val currentProject: Project) : Screen {
         val focusManager = LocalFocusManager.current
         val scope = rememberCoroutineScope()
 
+        val scaffoldState = rememberScaffoldState()
+
         val currentProjectVM by remember { mutableStateOf(CurrentProjectViewModel(currentProject)) }
 
         var isProjectMenuExpanded by remember { mutableStateOf(false) }
@@ -62,6 +67,10 @@ class ProjectScreen(private val currentProject: Project) : Screen {
         var logicType by remember { mutableStateOf(TextFieldValue("Комментарий")) }
         var logicsErrorState by remember { mutableStateOf(false) }
 
+        var isAddTestDialogVisible by remember { mutableStateOf(false) }
+        var testName by remember { mutableStateOf(TextFieldValue("Тест")) }
+        var testsErrorState by remember { mutableStateOf(false) }
+
         var comment by remember { mutableStateOf(TextFieldValue("")) }
         var commentErrorState by remember { mutableStateOf(false) }
 
@@ -70,6 +79,9 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                 add(to.index, removeAt(from.index))
             }
         })
+
+        var testIdx by remember { mutableStateOf(0) }
+        var isShowDropdownMenu by remember { mutableStateOf(false) }
 
         @OptIn(ExperimentalMaterialApi::class)
         @Composable
@@ -175,7 +187,88 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                 })
         }
 
+        @OptIn(ExperimentalMaterialApi::class)
+        @Composable
+        fun AddTestDialog() {
+            AlertDialog(modifier = Modifier.width(600.dp).padding(16.dp),
+                onDismissRequest = { isAddTestDialogVisible = false },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
+                                append("З")
+                            }
+                            withStyle(style = SpanStyle(color = Color.Black)) {
+                                append("аполните поля")
+                            }
+                        }, fontSize = 30.sp)
+                    }
+                }, buttons = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    currentProjectVM.addTest(Test(testName.text))
+                                    scope.launch {
+//                                        testsScrollState.listState.scrollToItem(currentProjectVM.tests.size - 1)
+                                    }
+                                    currentProjectVM.selectLast()
+                                    isAddTestDialogVisible = false
+                                }) {
+                                Text("Создать")
+                            }
+                        }
+                    }
+                }, text = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier.height(4.dp),
+                            text = "",
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            OutlinedTextField(
+                                singleLine = true,
+                                value = testName,
+                                onValueChange = {
+                                    if (testsErrorState) {
+                                        testsErrorState = false
+                                    }
+                                    testName = it
+                                },
+                                isError = testsErrorState,
+                                modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
+                                    keyEventNext(it, focusManager)
+                                },
+                                label = {
+                                    Text(text = "Название:")
+                                },
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                keyboardActions = keyboardActionNext(focusManager)
+                            )
+                        }
+                    }
+                })
+        }
+
         Scaffold(
+            scaffoldState = scaffoldState,
             topBar = {
                 TopAppBar(
                     title = {
@@ -196,6 +289,19 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                                     )
                                     Spacer(modifier = Modifier.weight(1f))
                                     Text("Новый")
+                                }
+
+                                DropdownMenuItem(onClick = {
+                                    ProjectRepository.save()
+                                    scope.launch {
+                                        scaffoldState.snackbarHostState.showSnackbar(
+                                            message = "Успешно сохранено"
+                                        )
+                                    }
+                                }, modifier = Modifier.width(150.dp)) {
+                                    Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Text("Сохранить")
                                 }
 
                                 DropdownMenuItem(onClick = {
@@ -245,6 +351,10 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                                     Text("Хард-аварии")
                                 }
                             }
+                            Button(onClick = {
+                            }) {
+                                Text(text = currentProjectVM.selectedTest.value?.text ?: "")
+                            }
                         }
                     }
                 )
@@ -263,17 +373,41 @@ class ProjectScreen(private val currentProject: Project) : Screen {
             if (isAddLogicDialogVisible) {
                 AddLogicDialog()
             }
+            if (isAddTestDialogVisible) {
+                AddTestDialog()
+            }
 
             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 56.dp)) {
                 Column(modifier = Modifier.weight(.1f).padding(16.dp)) {
                     LazyList(
                         modifier = Modifier.weight(.9f),
-                        items = currentProject.tests
-                    ) {
+                        items = currentProjectVM.tests,
+                        selectedItem = currentProjectVM.selectedTest.value,
+                        onNextListItem = {
+                            if (it == testIdx) {
+                                DropdownMenu(
+                                    expanded = isShowDropdownMenu,
+                                    onDismissRequest = { isShowDropdownMenu = false }) {
+                                    DropdownMenuItem(onClick = {
+                                        currentProjectVM.removeAt(testIdx)
+                                        testIdx = 0
+                                        currentProjectVM.clear()
+                                        currentProjectVM.selectFirst()
+                                        isShowDropdownMenu = false
+                                    }) {
+                                        Text("Удалить")
+                                    }
+                                }
+                            }
+                        }
+                    ) { it, isPrimary, _testIdx ->
+                        testIdx = _testIdx
                         currentProjectVM.selectTest(it)
+                        isShowDropdownMenu = !isPrimary
                     }
-                    CardListItem(modifier = Modifier.clickable {
 
+                    CardListItem(modifier = Modifier.clickable {
+                        isAddTestDialogVisible = true
                     }) {
                         Text("Добавить опыт")
                     }

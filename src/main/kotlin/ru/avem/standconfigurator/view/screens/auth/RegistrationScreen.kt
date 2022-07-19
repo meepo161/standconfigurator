@@ -81,7 +81,7 @@ class RegistrationScreen : Screen {
                 keyboardActions = keyboardActionNext(focusManager)
             )
             if (nameErrorState) {
-                Text(text = "Обязательно", color = MaterialTheme.colors.primary)
+                Text(text = "Обязательно", color = MaterialTheme.colors.error)
             }
             Spacer(Modifier.size(16.dp))
 
@@ -105,7 +105,7 @@ class RegistrationScreen : Screen {
                 keyboardActions = keyboardActionNext(focusManager)
             )
             if (loginErrorState) {
-                Text(text = "Обязательно", color = MaterialTheme.colors.primary)
+                Text(text = "Обязательно", color = MaterialTheme.colors.error)
             }
 
             Spacer(Modifier.size(16.dp))
@@ -141,7 +141,7 @@ class RegistrationScreen : Screen {
                 visualTransformation = if (passwordVisibility) PasswordVisualTransformation() else VisualTransformation.None
             )
             if (passwordErrorState) {
-                Text(text = "Обязательно", color = MaterialTheme.colors.primary)
+                Text(text = "Обязательно", color = MaterialTheme.colors.error)
             }
 
             Spacer(Modifier.size(16.dp))
@@ -182,7 +182,7 @@ class RegistrationScreen : Screen {
                     confirmPassword.text != password.text -> "Пароли не совпадают"
                     else -> ""
                 }
-                Text(text = msg, color = MaterialTheme.colors.primary)
+                Text(text = msg, color = MaterialTheme.colors.error)
             }
             Spacer(Modifier.size(16.dp))
             Button(
@@ -216,7 +216,7 @@ class RegistrationScreen : Screen {
                     }
                 },
                 content = {
-                    Text(text = "Зарегистрироваться", color = Color.White)
+                    Text(text = "Зарегистрироваться", color = MaterialTheme.colors.surface)
                 },
                 colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
             )

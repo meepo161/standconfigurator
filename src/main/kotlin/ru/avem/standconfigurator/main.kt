@@ -30,7 +30,7 @@ fun main() = application {
         ) {
             MaterialTheme(
                 typography = craneTypography,
-                colors = MaterialTheme.colors.copy(secondary = Color(0.38f, 0f, 0.93f))
+                colors = MaterialTheme.colors.copy(secondary = Color.Cyan)
             ) {
                 Navigator(LoginScreen())
             }

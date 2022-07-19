@@ -98,11 +98,14 @@ class DevicesScreen(private val currentProject: Project) : Screen {
                     Column(modifier = Modifier.weight(.1f)) {
                         LazyList(
                             modifier = Modifier.fillMaxHeight(),
-                            items = MainModel.allDevices
-                        ) {
-                            dvm.add(it)
-                            scope.launch {
-                                scrollState.scrollToItem(dvm.stateDevices.size - 1)
+                            items = MainModel.allDevices,
+                            selectedItem = MainModel.allDevices.first()
+                        ) { it, isPrimary, _ ->
+                            if (isPrimary) {
+                                dvm.add(it)
+                                scope.launch {
+                                    scrollState.scrollToItem(dvm.stateDevices.size - 1)
+                                }
                             }
                         }
                     }
