@@ -151,7 +151,7 @@ class LoginScreen : Screen {
 
                         },
                         content = {
-                            Text(text = "Вход", color = Color.White)
+                            Text(text = "Вход", color = MaterialTheme.colors.surface)
                         },
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
                     )

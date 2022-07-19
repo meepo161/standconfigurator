@@ -24,8 +24,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.repos.ProjectRepository
 import ru.avem.standconfigurator.model.structs.Project
-import ru.avem.standconfigurator.model.structs.projectClasses
+import ru.avem.standconfigurator.model.structs.ProjectType
+import ru.avem.standconfigurator.model.structs.projectTypes
 import ru.avem.standconfigurator.view.composables.ComboBox
 import ru.avem.standconfigurator.view.composables.TableView
 import ru.avem.standconfigurator.view.keyEventNext
@@ -52,12 +54,48 @@ class ProjectSelectorScreen : Screen {
         var filterValue by remember { mutableStateOf("") }
         var filterValueErrorState by remember { mutableStateOf(false) }
 
-        var name by remember { mutableStateOf(TextFieldValue("")) }
-        var nameErrorState by remember { mutableStateOf(false) }
+        var name by remember { mutableStateOf("") }
+        var nameErrorState by remember { mutableStateOf("Обязательно") }
 
-        var selectedProjectClass by remember { mutableStateOf(projectClasses.first()) }
+        var customType by remember { mutableStateOf(TextFieldValue("")) }
+        var customTypeErrorState by remember { mutableStateOf(true) }
+        var isCustomType by remember { mutableStateOf(false) }
+        var selectedProjectType by remember { mutableStateOf(projectTypes.first()) }
 
         var currentProject by remember { mutableStateOf<Project?>(null) }
+
+        var isDropDownMenuDismissed = { false }
+
+        fun checkCreateProjectErrors() {
+            nameErrorState = when {
+                name.isEmpty() -> "Обязательно"
+                ProjectRepository.projects.any { it.name == name } -> "Проект с таким именем уже существует"
+                else -> ""
+            }
+            customTypeErrorState = when {
+                customType.text.isEmpty() -> true
+                else -> false
+            }
+        }
+
+        fun createProject() {
+            pvm.add(
+                Project(
+                    name = name,
+                    projectTypeName = if (isCustomType) {
+                        customType.text
+                    } else {
+                        selectedProjectType.name
+                    },
+                    createDate = SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()),
+                    modificationDate = SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()),
+                    author = MainModel.currentUser.name,
+                    tests = mutableListOf(*selectedProjectType.initialTests.toTypedArray()),
+                    devices = mutableListOf(*selectedProjectType.initialDevices.toTypedArray()),
+                ),
+            )
+            isNewProjectDialogVisible = false
+        }
 
         @OptIn(ExperimentalMaterialApi::class)
         @Composable
@@ -94,16 +132,15 @@ class ProjectSelectorScreen : Screen {
                     ) {
                         Button(
                             onClick = {
-                                pvm.add(
-                                    Project(
-                                        name = name.text,
-                                        type = selectedProjectClass,
-                                        createDate = SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()),
-                                        modificationDate = SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()),
-                                        author = MainModel.currentUser.name
-                                    ),
-                                )
-                                isNewProjectDialogVisible = false
+                                if (nameErrorState.isEmpty()) {
+                                    if (isCustomType) {
+                                        if (!customTypeErrorState) {
+                                            createProject()
+                                        }
+                                    } else {
+                                        createProject()
+                                    }
+                                }
                             }) {
                             Text("Создать")
                         }
@@ -122,25 +159,28 @@ class ProjectSelectorScreen : Screen {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            OutlinedTextField(
-                                singleLine = true,
-                                value = name,
-                                onValueChange = {
-                                    if (nameErrorState) {
-                                        nameErrorState = false
-                                    }
-                                    name = it
-                                },
-                                isError = nameErrorState,
-                                modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
-                                    keyEventNext(it, focusManager)
-                                },
-                                label = {
-                                    Text(text = "Введите название проекта*")
-                                },
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                keyboardActions = keyboardActionNext(focusManager)
-                            )
+                            Column {
+                                OutlinedTextField(
+                                    singleLine = true,
+                                    value = name,
+                                    onValueChange = {
+                                        name = it
+                                        checkCreateProjectErrors()
+                                    },
+                                    isError = nameErrorState.isNotEmpty(),
+                                    modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
+                                        keyEventNext(it, focusManager)
+                                    },
+                                    label = {
+                                        Text(text = "Введите название проекта")
+                                    },
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                    keyboardActions = keyboardActionNext(focusManager)
+                                )
+                                if (nameErrorState.isNotEmpty()) {
+                                    Text(text = nameErrorState, color = MaterialTheme.colors.error)
+                                }
+                            }
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -151,16 +191,51 @@ class ProjectSelectorScreen : Screen {
                                 modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
                                     keyEventNext(it, focusManager)
                                 },
-                                initialValue = selectedProjectClass,
-                                items = projectClasses,
+                                initialValue = selectedProjectType,
+                                items = projectTypes,
                                 onDismissState = {},
                                 selectedValue = {
-                                    selectedProjectClass = it
+                                    selectedProjectType = it
+                                    isCustomType = selectedProjectType is ProjectType.Custom
                                 }
                             )
                         }
+                        if (isCustomType) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Column {
+                                    OutlinedTextField(
+                                        singleLine = true,
+                                        value = customType,
+                                        onValueChange = {
+                                            if (customTypeErrorState) {
+                                                customTypeErrorState = false
+                                            }
+                                            customType = it
+                                            checkCreateProjectErrors()
+                                        },
+                                        isError = customTypeErrorState,
+                                        modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
+                                            keyEventNext(it, focusManager)
+                                        },
+                                        label = {
+                                            Text(text = "Введите тип")
+                                        },
+                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                        keyboardActions = keyboardActionNext(focusManager)
+                                    )
+                                    if (customTypeErrorState) {
+                                        Text(text = "Обязательно", color = MaterialTheme.colors.error)
+                                    }
+                                }
+                            }
+                        }
                     }
                 })
+            checkCreateProjectErrors()
         }
 
         Scaffold(
@@ -206,7 +281,7 @@ class ProjectSelectorScreen : Screen {
                         items = pvm.getFilteredProjects(filterValue),
                         columns = listOf(
                             Project::name,
-                            Project::type,
+                            Project::projectTypeName,
                             Project::modificationDate,
                             Project::createDate,
                             Project::author,
@@ -233,10 +308,12 @@ class ProjectSelectorScreen : Screen {
                             DropdownMenuItem(onClick = {
                                 pvm.remove(currentProject!!)
                                 currentProject = null
+                                isDropDownMenuDismissed = { true }
                             }) {
                                 Text("Удалить")
                             }
-                        }
+                        },
+                        isDropDownMenuDismissed = isDropDownMenuDismissed
                     )
                 }
             },
