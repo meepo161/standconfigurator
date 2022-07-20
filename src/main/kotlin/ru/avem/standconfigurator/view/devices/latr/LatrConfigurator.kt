@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ru.avem.standconfigurator.formatRealNumber
+import ru.avem.standconfigurator.autoformat
 import ru.avem.standconfigurator.view.composables.ComboBox
 
 @Composable
@@ -60,9 +60,8 @@ fun LatrConfigurator(
                     configurationModel.transformationCoefficient.value = if (text.isEmpty()) {
                         ""
                     } else {
-                        formatRealNumber(
-                            text.toDoubleOrNull() ?: configurationModel.transformationCoefficient.value.toDouble()
-                        ).toString()
+                        (text.toDoubleOrNull()
+                            ?: configurationModel.transformationCoefficient.value.toDouble()).autoformat()
                     }
                 },
                 maxLines = 1,
@@ -81,9 +80,8 @@ fun LatrConfigurator(
                     configurationModel.lowVoltageCoefficient.value = if (text.isEmpty()) {
                         ""
                     } else {
-                        formatRealNumber(
-                            text.toDoubleOrNull() ?: configurationModel.lowVoltageCoefficient.value.toDouble()
-                        ).toString()
+                        (text.toDoubleOrNull()
+                            ?: configurationModel.lowVoltageCoefficient.value.toDouble()).autoformat()
                     }
                 },
                 maxLines = 1,
@@ -145,9 +143,7 @@ fun LatrConfigurator(
                     configurationModel.rotationSpeed.value = if (text.isEmpty()) {
                         ""
                     } else {
-                        formatRealNumber(
-                            text.toDoubleOrNull() ?: configurationModel.rotationSpeed.value.toDouble()
-                        ).toString()
+                        (text.toDoubleOrNull() ?: configurationModel.rotationSpeed.value.toDouble()).autoformat()
                     }
                 },
                 maxLines = 1,

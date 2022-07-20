@@ -88,7 +88,7 @@ class DevicesScreen(private val currentProject: Project) : Screen {
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         if (!(deviceIdx < 0 || deviceIdx >= dvm.stateDevices.size)) {
-                            DeviceConfiguratorWidget(dvm.stateDevices[deviceIdx].text)
+                            DeviceConfiguratorWidget(dvm.stateDevices[deviceIdx])
                         }
                     }
                 },
@@ -98,11 +98,11 @@ class DevicesScreen(private val currentProject: Project) : Screen {
                     Column(modifier = Modifier.weight(.1f)) {
                         LazyList(
                             modifier = Modifier.fillMaxHeight(),
-                            items = MainModel.allDevices,
-                            selectedItem = MainModel.allDevices.first()
+                            items = MainModel.allDevices.values.toList(),
+                            selectedItem = MainModel.allDevices.values.first()
                         ) { it, isPrimary, _ ->
                             if (isPrimary) {
-                                dvm.add(it)
+                                dvm.add(it.name)
                                 scope.launch {
                                     scrollState.scrollToItem(dvm.stateDevices.size - 1)
                                 }
@@ -125,7 +125,7 @@ class DevicesScreen(private val currentProject: Project) : Screen {
                                         rtlDrawer.open()
                                     }
                                 }) {
-                                    Text(dvm.stateDevices[it].text)
+                                    Text(dvm.stateDevices[it].toString())
                                 }
 
                                 if (deviceIdx == it) {

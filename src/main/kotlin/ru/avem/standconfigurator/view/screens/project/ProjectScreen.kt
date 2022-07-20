@@ -6,6 +6,7 @@ import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -79,6 +80,8 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                 add(to.index, removeAt(from.index))
             }
         })
+
+        val testsScrollState = rememberLazyListState()
 
         var testIdx by remember { mutableStateOf(0) }
         var isShowDropdownMenu by remember { mutableStateOf(false) }
@@ -220,10 +223,10 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = {
                                     currentProjectVM.addTest(Test(testName.text))
-                                    scope.launch {
-//                                        testsScrollState.listState.scrollToItem(currentProjectVM.tests.size - 1)
-                                    }
                                     currentProjectVM.selectLast()
+                                    scope.launch {
+                                        testsScrollState.scrollToItem(currentProjectVM.selectedTestIdx)
+                                    }
                                     isAddTestDialogVisible = false
                                 }) {
                                 Text("Создать")
@@ -305,7 +308,7 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                                 }
 
                                 DropdownMenuItem(onClick = {
-                                    localNavigator.push(LoginScreen())
+                                    localNavigator.popUntilRoot()
                                 }) {
                                     Icon(imageVector = Icons.Default.Logout, contentDescription = null)
                                     Spacer(modifier = Modifier.weight(1f))
@@ -353,7 +356,7 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             }
                             Button(onClick = {
                             }) {
-                                Text(text = currentProjectVM.selectedTest.value?.text ?: "")
+                                Text(text = currentProjectVM.selectedTest.value?.name ?: "")
                             }
                         }
                     }
@@ -381,6 +384,7 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                 Column(modifier = Modifier.weight(.1f).padding(16.dp)) {
                     LazyList(
                         modifier = Modifier.weight(.9f),
+                        state = testsScrollState,
                         items = currentProjectVM.tests,
                         selectedItem = currentProjectVM.selectedTest.value,
                         onNextListItem = {

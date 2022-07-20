@@ -1,12 +1,10 @@
 package ru.avem.standconfigurator.model.repos
 
-import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.data.ProjectType
 import ru.avem.standconfigurator.model.structs.Project
-import ru.avem.standconfigurator.model.structs.ProjectType
 import ru.avem.standconfigurator.model.utils.loadFromJson
 import ru.avem.standconfigurator.model.utils.saveToJsonFile
 import java.nio.file.Paths
-import java.text.SimpleDateFormat
 
 object ProjectRepository {
     lateinit var projects: MutableList<Project>
@@ -41,8 +39,8 @@ object ProjectRepository {
                     createDate = "01.02.2022",
                     modificationDate = "13.07.2022",
                     author = "Чамлай В.И.",
-                    tests = mutableListOf(*ProjectType.KSPEM.initialTests.toTypedArray()),
-                    devices = mutableListOf(*ProjectType.KSPEM.initialDevices.toTypedArray()),
+                    tests = mutableListOf(*ProjectType.KSPEM.initialTests.map {it.copy()}.toTypedArray()),
+                    devices = mutableListOf(*ProjectType.KSPEM.initialDevices.map {it.clone()}.toTypedArray()),
                 ),
                 Project(
                     name = "Богатырь",
@@ -50,8 +48,8 @@ object ProjectRepository {
                     createDate = "09.10.2021",
                     modificationDate = "13.07.2022",
                     author = "Безъязычный В.С.",
-                    tests = mutableListOf(*ProjectType.KSPEM.initialTests.toTypedArray()),
-                    devices = mutableListOf(*ProjectType.KSPEM.initialDevices.toTypedArray()),
+                    tests = mutableListOf(*ProjectType.KSPEM.initialTests.map {it.copy()}.toTypedArray()),
+                    devices = mutableListOf(*ProjectType.KSPEM.initialDevices.map {it.clone()}.toTypedArray()),
                 ),
                 Project(
                     name = "SUM-1",
@@ -59,8 +57,8 @@ object ProjectRepository {
                     createDate = "08.09.2021",
                     modificationDate = "13.07.2022",
                     author = "Сулейманов М.У.",
-                    tests = mutableListOf(*ProjectType.SUM.initialTests.toTypedArray()),
-                    devices = mutableListOf(*ProjectType.SUM.initialDevices.toTypedArray()),
+                    tests = mutableListOf(*ProjectType.SUM.initialTests.map {it.copy()}.toTypedArray()),
+                    devices = mutableListOf(*ProjectType.SUM.initialDevices.map {it.clone()}.toTypedArray()),
                 ),
                 Project(
                     name = "Пролетарск",
@@ -68,8 +66,8 @@ object ProjectRepository {
                     createDate = "01.02.2021",
                     modificationDate = "01.02.2022",
                     author = "Широковских А.Н.",
-                    tests = mutableListOf(*ProjectType.KSIN.initialTests.toTypedArray()),
-                    devices = mutableListOf(*ProjectType.KSIN.initialDevices.toTypedArray()),
+                    tests = mutableListOf(*ProjectType.KSIN.initialTests.map {it.copy()}.toTypedArray()),
+                    devices = mutableListOf(*ProjectType.KSIN.initialDevices.map {it.clone()}.toTypedArray()),
                 ),
                 Project(
                     name = "Сургут",
@@ -77,8 +75,8 @@ object ProjectRepository {
                     createDate = "01.04.2022",
                     modificationDate = "13.07.2021",
                     author = "Вайсберг Ю.В.",
-                    tests = mutableListOf(*ProjectType.LIVS.initialTests.toTypedArray()),
-                    devices = mutableListOf(*ProjectType.LIVS.initialDevices.toTypedArray()),
+                    tests = mutableListOf(*ProjectType.LIVS.initialTests.map {it.copy()}.toTypedArray()),
+                    devices = mutableListOf(*ProjectType.LIVS.initialDevices.map {it.clone()}.toTypedArray()),
                 ),
                 Project(
                     name = "ИркутскКСПЭМ",
@@ -86,8 +84,8 @@ object ProjectRepository {
                     createDate = "02.04.2022",
                     modificationDate = "14.07.2021",
                     author = "Магомедова Д.У.",
-                    tests = mutableListOf(*ProjectType.KSPEM.initialTests.toTypedArray()),
-                    devices = mutableListOf(*ProjectType.KSPEM.initialDevices.toTypedArray()),
+                    tests = mutableListOf(*ProjectType.KSPEM.initialTests.map {it.copy()}.toTypedArray()),
+                    devices = mutableListOf(*ProjectType.KSPEM.initialDevices.map {it.clone()}.toTypedArray()),
                 ),
                 Project(
                     name = "ЭТЗ",
@@ -95,8 +93,8 @@ object ProjectRepository {
                     createDate = "05.06.2021",
                     modificationDate = "08.08.2021",
                     author = "Климахин В.С.",
-                    tests = mutableListOf(*ProjectType.KSPT.initialTests.toTypedArray()),
-                    devices = mutableListOf(*ProjectType.KSPT.initialDevices.toTypedArray()),
+                    tests = mutableListOf(*ProjectType.KSPT.initialTests.map {it.copy()}.toTypedArray()),
+                    devices = mutableListOf(*ProjectType.KSPT.initialDevices.map {it.clone()}.toTypedArray()),
                 ),
             )
             saveToJsonFile(

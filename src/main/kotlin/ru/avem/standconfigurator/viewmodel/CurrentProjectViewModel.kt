@@ -11,6 +11,9 @@ class CurrentProjectViewModel(private val currentProject: Project) {
 
     var tests = mutableStateListOf(*currentProject.tests.toTypedArray())
 
+    val selectedTestIdx
+        get() = tests.indexOf<Test>(selectedTest.value!!)
+
     var selectedTestLogics = mutableStateListOf(*selectedTest.value?.logics?.toTypedArray() ?: arrayOf())
 
     fun selectTest(test: Test) {

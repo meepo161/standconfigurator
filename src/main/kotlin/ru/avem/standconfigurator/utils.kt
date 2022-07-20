@@ -3,8 +3,8 @@ package ru.avem.standconfigurator
 import java.util.*
 import kotlin.math.abs
 
-fun formatRealNumber(num: Double): Double {
-    val absNum = abs(num)
+fun Double.autoformat(): String {
+    val absNum = abs(this)
 
     var format = "%.0f"
     when {
@@ -16,5 +16,7 @@ fun formatRealNumber(num: Double): Double {
         absNum < 1000f -> format = "%.1f"
         absNum < 10000f -> format = "%.0f"
     }
-    return String.format(Locale.US, format, num).toDouble()
+    return String.format(Locale.US, format, this)
 }
+
+fun Float.autoformat() = this.toDouble().autoformat()

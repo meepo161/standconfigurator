@@ -24,10 +24,10 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.data.ProjectType
+import ru.avem.standconfigurator.model.data.projectTypes
 import ru.avem.standconfigurator.model.repos.ProjectRepository
 import ru.avem.standconfigurator.model.structs.Project
-import ru.avem.standconfigurator.model.structs.ProjectType
-import ru.avem.standconfigurator.model.structs.projectTypes
 import ru.avem.standconfigurator.view.composables.ComboBox
 import ru.avem.standconfigurator.view.composables.TableView
 import ru.avem.standconfigurator.view.keyEventNext
@@ -90,8 +90,8 @@ class ProjectSelectorScreen : Screen {
                     createDate = SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()),
                     modificationDate = SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()),
                     author = MainModel.currentUser.name,
-                    tests = mutableListOf(*selectedProjectType.initialTests.toTypedArray()),
-                    devices = mutableListOf(*selectedProjectType.initialDevices.toTypedArray()),
+                    tests = mutableListOf(*selectedProjectType.initialTests.map{it.copy()}.toTypedArray()),
+                    devices = mutableListOf(*selectedProjectType.initialDevices.map{it.clone()}.toTypedArray()),
                 ),
             )
             isNewProjectDialogVisible = false

@@ -1,9 +1,10 @@
 package ru.avem.standconfigurator.model.structs
 
-import ru.avem.standconfigurator.model.IListItem
 
 @kotlinx.serialization.Serializable
 data class Test(
-    override val text: String,
+    val name: String,
     val logics: MutableList<LogicItem> = mutableListOf()
-) : IListItem
+) {
+    override fun toString() = name
+}
