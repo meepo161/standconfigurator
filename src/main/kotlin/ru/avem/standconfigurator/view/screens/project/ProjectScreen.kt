@@ -40,14 +40,15 @@ import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
 import ru.avem.standconfigurator.model.MainModel
 import ru.avem.standconfigurator.model.repos.ProjectRepository
+import ru.avem.standconfigurator.model.structs.Device
 import ru.avem.standconfigurator.model.structs.LogicItem
 import ru.avem.standconfigurator.model.structs.Project
 import ru.avem.standconfigurator.model.structs.Test
 import ru.avem.standconfigurator.view.composables.CardListItem
+import ru.avem.standconfigurator.view.composables.ComboBox
 import ru.avem.standconfigurator.view.composables.LazyList
 import ru.avem.standconfigurator.view.keyEventNext
 import ru.avem.standconfigurator.view.keyboardActionNext
-import ru.avem.standconfigurator.view.screens.auth.LoginScreen
 import ru.avem.standconfigurator.viewmodel.CurrentProjectViewModel
 
 class ProjectScreen(private val currentProject: Project) : Screen {
@@ -65,15 +66,12 @@ class ProjectScreen(private val currentProject: Project) : Screen {
         var isProtectionsMenuExpanded by remember { mutableStateOf(false) }
 
         var isAddLogicDialogVisible by remember { mutableStateOf(false) }
-        var logicType by remember { mutableStateOf(TextFieldValue("Комментарий")) }
-        var logicsErrorState by remember { mutableStateOf(false) }
-
         var isAddTestDialogVisible by remember { mutableStateOf(false) }
-        var testName by remember { mutableStateOf(TextFieldValue("Тест")) }
-        var testsErrorState by remember { mutableStateOf(false) }
 
-        var comment by remember { mutableStateOf(TextFieldValue("")) }
-        var commentErrorState by remember { mutableStateOf(false) }
+        var testName by remember { mutableStateOf(TextFieldValue("Опыт")) }
+        var testsErrorState by remember { mutableStateOf(false) }
+        var selectTestIdx by remember { mutableStateOf(0) }
+        var isShowTestDropdownMenu by remember { mutableStateOf(false) }
 
         val logicsScrollState = rememberReorderableLazyListState(onMove = { from, to ->
             currentProjectVM.selectedTestLogics = currentProjectVM.selectedTestLogics.apply {
@@ -81,10 +79,16 @@ class ProjectScreen(private val currentProject: Project) : Screen {
             }
         })
 
-        val testsScrollState = rememberLazyListState()
+        val logicTypes = listOf("Коммутация", "Регулировка", "Выжидание", "Защиты", "Комментарий")
+        var logicType by remember { mutableStateOf((logicTypes.first())) }
 
-        var testIdx by remember { mutableStateOf(0) }
-        var isShowDropdownMenu by remember { mutableStateOf(false) }
+        val selectedCommutationDevice = mutableStateOf<Device?>(null)
+        val selectedCommutationDevicePort = mutableStateOf("")
+        val selectedCommutationDevicePortOn = mutableStateOf(true)
+
+        var commentaryText by remember { mutableStateOf("") }
+
+        val testsScrollState = rememberLazyListState()
 
         @OptIn(ExperimentalMaterialApi::class)
         @Composable
@@ -99,10 +103,10 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                     ) {
                         Text(text = buildAnnotatedString {
                             withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
-                                append("В")
+                                append("З")
                             }
                             withStyle(style = SpanStyle(color = Color.Black)) {
-                                append("ыберите тип инструкции")
+                                append("аполните поля")
                             }
                         }, fontSize = 30.sp)
                     }
@@ -118,7 +122,13 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             Button(
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = {
-                                    currentProjectVM.addLogic(LogicItem(comment.text))
+                                    val logicItemValue = when (logicType) {
+                                        "Коммутация" -> "[Коммутация] ${selectedCommutationDevice.value}->${selectedCommutationDevicePort.value} [${if (selectedCommutationDevicePortOn.value) "ВКЛ" else "ВЫКЛ"}]"
+                                        "Комментарий" -> "[Комментарий] $commentaryText"
+                                        else -> error("handle")
+                                    }
+
+                                    currentProjectVM.addLogic(LogicItem(logicItemValue))
                                     scope.launch {
                                         logicsScrollState.listState.scrollToItem(currentProjectVM.selectedTestLogics.size - 1)
                                     }
@@ -141,24 +151,14 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            OutlinedTextField(
-                                singleLine = true,
-                                value = logicType,
-                                onValueChange = {
-                                    if (logicsErrorState) {
-                                        logicsErrorState = false
-                                    }
+                            ComboBox(
+                                modifier = Modifier.fillMaxWidth(),
+                                initialValue = logicType,
+                                items = logicTypes,
+                                onDismissState = {},
+                                selectedValue = {
                                     logicType = it
-                                },
-                                isError = logicsErrorState,
-                                modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
-                                    keyEventNext(it, focusManager)
-                                },
-                                label = {
-                                    Text(text = "Тип:")
-                                },
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                keyboardActions = keyboardActionNext(focusManager)
+                                }
                             )
                         }
                         Row(
@@ -166,25 +166,61 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            OutlinedTextField(
-                                singleLine = true,
-                                value = comment,
-                                onValueChange = {
-                                    if (commentErrorState) {
-                                        commentErrorState = false
+                            Column {
+                                when (logicType) {
+                                    "Коммутация" -> {
+                                        val commutationDevices = currentProject.devices.filter { it.mark == "DD" }
+                                        if (commutationDevices.isNotEmpty()) {
+                                            if (selectedCommutationDevice.value == null) {
+                                                selectedCommutationDevice.value = commutationDevices.first()
+                                            }
+                                            ComboBox(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                initialValue = selectedCommutationDevice.value,
+                                                items = commutationDevices,
+                                                onDismissState = {},
+                                                selectedValue = {
+                                                    selectedCommutationDevice.value = it
+                                                })
+                                            ComboBox(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                initialValue = selectedCommutationDevicePort.value,
+                                                items = selectedCommutationDevice.value?.params?.map { it.paramValue.store } ?: listOf(),
+                                                onDismissState = {},
+                                                selectedValue = {
+                                                    selectedCommutationDevicePort.value = it
+                                                }
+                                            )
+                                            ComboBox(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                initialValue = "замкнуть",
+                                                items = listOf("замкнуть", "разомкнуть"),
+                                                onDismissState = {},
+                                                selectedValue = {
+                                                    selectedCommutationDevicePortOn.value = it == "замкнуть"
+                                                }
+                                            )
+                                        }
                                     }
-                                    comment = it
-                                },
-                                isError = commentErrorState,
-                                modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
-                                    keyEventNext(it, focusManager)
-                                },
-                                label = {
-                                    Text(text = "Текст комментария")
-                                },
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                keyboardActions = keyboardActionNext(focusManager)
-                            )
+                                    "Комментарий" -> {
+                                        OutlinedTextField(
+                                            singleLine = true,
+                                            value = commentaryText,
+                                            onValueChange = {
+                                                commentaryText = it
+                                            },
+                                            modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
+                                                keyEventNext(it, focusManager)
+                                            },
+                                            label = {
+                                                Text(text = "Введите комментарий")
+                                            },
+                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                            keyboardActions = keyboardActionNext(focusManager)
+                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 })
@@ -308,11 +344,25 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                                 }
 
                                 DropdownMenuItem(onClick = {
+                                    // TODO добавить окно выбора места сохранения
+                                    ProjectRepository.save()
+                                    scope.launch {
+                                        scaffoldState.snackbarHostState.showSnackbar(
+                                            message = "Успешно сохранено"
+                                        )
+                                    }
+                                }, modifier = Modifier.width(150.dp)) {
+                                    Icon(imageVector = Icons.Default.Save, contentDescription = null)
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Text("Сохранить как...")
+                                }
+
+                                DropdownMenuItem(onClick = {
                                     localNavigator.popUntilRoot()
                                 }) {
                                     Icon(imageVector = Icons.Default.Logout, contentDescription = null)
                                     Spacer(modifier = Modifier.weight(1f))
-                                    Text("Выйти")
+                                    Text("Сменить пользователя")
                                 }
 
                                 DropdownMenuItem(onClick = {
@@ -326,7 +376,6 @@ class ProjectScreen(private val currentProject: Project) : Screen {
 
                             Button(onClick = {
                                 localNavigator.push(DevicesScreen(currentProject))
-
                             }) {
                                 Text(text = "Приборы")
                             }
@@ -339,7 +388,7 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                                 onDismissRequest = { isProtectionsMenuExpanded = false }) {
 
                                 DropdownMenuItem(onClick = {
-//                                    localNavigator.push(SoftAlarmsScreen()) todo сделать экран защит
+//                                    localNavigator.push(SoftAlarmsScreen()) TODO сделать экран защит
                                 }) {
                                     Icon(imageVector = Icons.Outlined.OnlinePrediction, contentDescription = null)
                                     Spacer(modifier = Modifier.weight(1f))
@@ -347,16 +396,18 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                                 }
 
                                 DropdownMenuItem(onClick = {
-//                                    localNavigator.push(HardAlarmsScreen()) todo сделать экран защит
+//                                    localNavigator.push(HardAlarmsScreen()) TODO сделать экран защит
                                 }) {
                                     Icon(imageVector = Icons.Default.OfflineBolt, contentDescription = null)
                                     Spacer(modifier = Modifier.weight(1f))
                                     Text("Хард-аварии")
                                 }
                             }
+
                             Button(onClick = {
+//                                localNavigator.push(ViewConstructorScreen(currentProject)) TODO сделать экран конструктора представлений
                             }) {
-                                Text(text = currentProjectVM.selectedTest.value?.name ?: "")
+                                Text(text = "Конструктор представления")
                             }
                         }
                     }
@@ -388,16 +439,16 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                         items = currentProjectVM.tests,
                         selectedItem = currentProjectVM.selectedTest.value,
                         onNextListItem = {
-                            if (it == testIdx) {
+                            if (it == selectTestIdx) {
                                 DropdownMenu(
-                                    expanded = isShowDropdownMenu,
-                                    onDismissRequest = { isShowDropdownMenu = false }) {
+                                    expanded = isShowTestDropdownMenu,
+                                    onDismissRequest = { isShowTestDropdownMenu = false }) {
                                     DropdownMenuItem(onClick = {
-                                        currentProjectVM.removeAt(testIdx)
-                                        testIdx = 0
+                                        currentProjectVM.removeAt(selectTestIdx)
+                                        selectTestIdx = 0
                                         currentProjectVM.clear()
                                         currentProjectVM.selectFirst()
-                                        isShowDropdownMenu = false
+                                        isShowTestDropdownMenu = false
                                     }) {
                                         Text("Удалить")
                                     }
@@ -405,9 +456,9 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             }
                         }
                     ) { it, isPrimary, _testIdx ->
-                        testIdx = _testIdx
+                        selectTestIdx = _testIdx
                         currentProjectVM.selectTest(it)
-                        isShowDropdownMenu = !isPrimary
+                        isShowTestDropdownMenu = !isPrimary
                     }
 
                     CardListItem(modifier = Modifier.clickable {
@@ -422,7 +473,7 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             .weight(.9f)
                             .reorderable(logicsScrollState)
                             .detectReorderAfterLongPress(logicsScrollState),
-                        state = logicsScrollState.listState//logicsScrollState
+                        state = logicsScrollState.listState
                     ) {
                         items(currentProjectVM.selectedTestLogics.size) {
                             ReorderableItem(logicsScrollState, index = it, key = null) { isDragging ->

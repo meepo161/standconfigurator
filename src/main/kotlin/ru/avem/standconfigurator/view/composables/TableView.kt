@@ -34,10 +34,9 @@ fun <T> TableView(
     onItemPrimaryPressed: (Int) -> Unit,
     onItemSecondaryPressed: (Int) -> Unit,
     contextMenuContent: @Composable () -> Unit,
-    isDropDownMenuDismissed: () -> Boolean
+    isExpandedDropdownMenu: MutableState<Boolean>
 ) {
     var hoveredItem by remember { mutableStateOf(selectedItem) }
-    var isExpandedDropdownMenu by remember { mutableStateOf(false) }
     Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(bottom = 60.dp)) {
         Row {
             if (columnNames.size == columns.size) {
@@ -69,10 +68,10 @@ fun <T> TableView(
                     onItemPrimaryPressed(i)
                 } else if (buttons.isSecondaryPressed) {
                     onItemSecondaryPressed(i)
-                    isExpandedDropdownMenu = true
+                    isExpandedDropdownMenu.value = true
                 }
             }).background(
-                if (!isExpandedDropdownMenu || isDropDownMenuDismissed()) {
+                if (!isExpandedDropdownMenu.value) {
                     if (hoveredItem == item) {
                         MaterialTheme.colors.secondary
                     } else {
@@ -102,8 +101,8 @@ fun <T> TableView(
                     }
                 }
                 if (selectedItem == item) {
-                    DropdownMenu(expanded = isExpandedDropdownMenu, onDismissRequest = {
-                        isExpandedDropdownMenu = false
+                    DropdownMenu(expanded = isExpandedDropdownMenu.value, onDismissRequest = {
+                        isExpandedDropdownMenu.value = false
                     }) {
                         contextMenuContent()
                     }

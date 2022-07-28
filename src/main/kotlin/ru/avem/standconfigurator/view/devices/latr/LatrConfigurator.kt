@@ -14,7 +14,8 @@ import ru.avem.standconfigurator.view.composables.ComboBox
 
 @Composable
 fun LatrConfigurator(
-    configurationModel: LatrConfigurationViewModel = LatrConfigurationViewModel(
+    configurationModel: LatrConfigurationViewModel = LatrConfigurationViewModel( // TODO перенести регистры в класс
+        // AvemATR
         model = LatrConfigurationModel(
             count = 1,
             transformationCoefficient = 1f,

@@ -15,8 +15,8 @@ import ru.avem.standconfigurator.view.composables.ComboBox
 fun DeviceConfigurator(device: Device) {
     Column(modifier = Modifier.padding(16.dp)) {
         device.params.forEach { param ->
-            val paramData = param.first
-            val paramValue = param.second
+            val paramData = param.paramData
+            val paramValue = param.paramValue
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -71,7 +71,7 @@ fun DeviceConfigurator(device: Device) {
                         )
                     Type.ENUM -> ComboBox(
                         initialValue = paramValue.valueState.value,
-                        items = paramValue.values,
+                        items = paramValue.stores,
                         selectedValue = {
                             paramValue.changeValue(it)
                         }

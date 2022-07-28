@@ -1,5 +1,6 @@
 package ru.avem.standconfigurator.view.screens.auth
 
+import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -8,10 +9,11 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusTarget
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -33,7 +35,9 @@ import ru.avem.standconfigurator.view.keyboardActionNext
 import ru.avem.standconfigurator.view.screens.intermediate.ProjectSelectorScreen
 
 class LoginScreen : Screen {
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
+    @Preview
     override fun Content() {
         val localNavigator = LocalNavigator.currentOrThrow
         val focusManager = LocalFocusManager.current
@@ -46,6 +50,32 @@ class LoginScreen : Screen {
         val authorize: (User) -> Unit = { user ->
             MainModel.currentUser = user
             localNavigator.push(ProjectSelectorScreen())
+        }
+
+        fun tryLogin() {
+            when {
+                login.text.isEmpty() -> {
+                    loginErrorState = true
+                }
+                password.text.isEmpty() -> {
+                    passwordErrorState = true
+                }
+                else -> {
+                    if (login.text == "admin" && password.text == "avem") {
+                        authorize(User("ADMIN"))
+                    } else {
+                        val currentUser = UsersRepository.users.firstOrNull { user ->
+                            user.login == login.text && user.password == password.text
+                        }
+                        if (currentUser != null) {
+                            authorize(currentUser)
+                        } else {
+                            loginErrorState = true
+                            passwordErrorState = true
+                        }
+                    }
+                }
+            }
         }
 
         Scaffold(
@@ -76,6 +106,13 @@ class LoginScreen : Screen {
                         isError = loginErrorState,
                         modifier = Modifier.focusTarget().onPreviewKeyEvent {
                             keyEventNext(it, focusManager)
+                        }.onKeyEvent {
+                            if (it.key == Key.Enter) {
+                                tryLogin()
+                                true
+                            } else {
+                                false
+                            }
                         },
                         label = {
                             Text(text = "Введите логин*")
@@ -100,6 +137,13 @@ class LoginScreen : Screen {
                         isError = passwordErrorState,
                         modifier = Modifier.focusTarget().onPreviewKeyEvent {
                             keyEventNext(it, focusManager)
+                        }.onKeyEvent {
+                            if (it.key == Key.Enter) {
+                                tryLogin()
+                                true
+                            } else {
+                                false
+                            }
                         },
                         label = {
                             Text(text = "Введите пароль*")
@@ -125,42 +169,17 @@ class LoginScreen : Screen {
                     Spacer(Modifier.size(16.dp))
                     Button(
                         onClick = {
-                            when {
-                                login.text.isEmpty() -> {
-                                    loginErrorState = true
-                                }
-                                password.text.isEmpty() -> {
-                                    passwordErrorState = true
-                                }
-                                else -> {
-                                    if (login.text == "admin" && password.text == "avem") {
-                                        authorize(User("ADMIN"))
-                                    } else {
-                                        val currentUser = UsersRepository.users.firstOrNull { user ->
-                                            user.login == login.text && user.password == password.text
-                                        }
-                                        if (currentUser != null) {
-                                            authorize(currentUser)
-                                        } else {
-                                            loginErrorState = true
-                                            passwordErrorState = true
-                                        }
-                                    }
-                                }
-                            }
-
+                            tryLogin()
                         },
                         content = {
                             Text(text = "Вход", color = MaterialTheme.colors.surface)
                         },
                         colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.primary)
                     )
-                    Row(horizontalArrangement = Arrangement.Center) {
-                        TextButton(onClick = {
-                            localNavigator.push(RegistrationScreen())
-                        }) {
-                            Text(text = "Регистрация", color = MaterialTheme.colors.primary)
-                        }
+                    TextButton(onClick = {
+                        localNavigator.push(RegistrationScreen())
+                    }) {
+                        Text(text = "Регистрация", color = MaterialTheme.colors.primary)
                     }
                 }
             })

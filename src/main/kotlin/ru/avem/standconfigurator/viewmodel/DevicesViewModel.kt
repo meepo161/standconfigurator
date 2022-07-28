@@ -19,7 +19,7 @@ class DevicesViewModel(private val devices: MutableList<Device>) {
         var address = needMarkDevices.maxOfOrNull { it.address }
         if (address != null) {
             address += 1
-            //todo обработать address > 251
+            //TODO обработать address > 251
             baseDevice.address = minOf(address, 251)
         }
         val newDevice = baseDevice.clone()

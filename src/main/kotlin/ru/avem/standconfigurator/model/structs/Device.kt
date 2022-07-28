@@ -1,12 +1,13 @@
 package ru.avem.standconfigurator.model.structs
 import androidx.compose.runtime.mutableStateOf
+import ru.avem.standconfigurator.PairParam
 
 @kotlinx.serialization.Serializable
 open class Device(
     var mark: String = "",
     var address: Int = 0,
     var name: String,
-    var params: List<Pair<ParamData, Value>> = listOf(),
+    var params: List<PairParam<ParamData, ParamValue>> = listOf(),
 ) {
     fun clone(): Device {
         return Device(
@@ -14,7 +15,7 @@ open class Device(
             address = address,
             name = name,
             params = params.mapIndexed { i, it ->
-                it.first.copy() to it.second.clone(params[i].second)
+                PairParam(it.paramData.copy(), it.paramValue.clone(params[i].paramValue))
             }
         )
     }
@@ -41,17 +42,17 @@ data class ParamData(
 )
 
 @kotlinx.serialization.Serializable
-data class Value(var value: String = "", val values: List<String> = listOf()) {
-    @kotlinx.serialization.Transient var valueState = mutableStateOf(value)
+data class ParamValue(var store: String = "", val stores: List<String> = listOf()) {
+    @kotlinx.serialization.Transient var valueState = mutableStateOf(store)
 
     fun changeValue(_value: String) {
-        value = _value
+        store = _value
         valueState.value = _value
     }
 
-    fun clone(old: Value) = Value(
-        old.value,
-        old.values.map { it }
+    fun clone(old: ParamValue) = ParamValue(
+        old.store,
+        old.stores.map { it }
     ).apply {
         valueState = mutableStateOf(old.valueState.value)
     }

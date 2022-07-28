@@ -20,3 +20,11 @@ fun Double.autoformat(): String {
 }
 
 fun Float.autoformat() = this.toDouble().autoformat()
+
+@kotlinx.serialization.Serializable
+data class PairParam<out A, out B>(
+    val paramData: A,
+    val paramValue: B
+) {
+    override fun toString(): String = "($paramData, $paramValue)"
+}

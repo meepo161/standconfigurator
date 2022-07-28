@@ -31,7 +31,7 @@ fun main() = application {
         Window(
 //            resizable = false,
 //            undecorated = true,
-            state = rememberWindowState(size = DpSize(1400.dp, 700.dp),/*placement = WindowPlacement.Maximized*/),
+            state = rememberWindowState(size = DpSize(1600.dp, 900.dp),/*placement = WindowPlacement.Maximized*/),
             onCloseRequest = ::exitApplication,
             title = "Конфигуратор промышленных стендов"
         ) {
