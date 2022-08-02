@@ -39,19 +39,27 @@ import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
 import ru.avem.standconfigurator.model.MainModel
+import ru.avem.standconfigurator.model.ProjectModel
+import ru.avem.standconfigurator.model.ProjectModel.currentProject
+import ru.avem.standconfigurator.model.ProjectModel.currentProjectVM
+import ru.avem.standconfigurator.model.ProjectModel.dvm
 import ru.avem.standconfigurator.model.repos.ProjectRepository
-import ru.avem.standconfigurator.model.structs.Device
 import ru.avem.standconfigurator.model.structs.LogicItem
 import ru.avem.standconfigurator.model.structs.Project
 import ru.avem.standconfigurator.model.structs.Test
 import ru.avem.standconfigurator.view.composables.CardListItem
-import ru.avem.standconfigurator.view.composables.ComboBox
 import ru.avem.standconfigurator.view.composables.LazyList
+import ru.avem.standconfigurator.view.composables.LogicItemView
 import ru.avem.standconfigurator.view.keyEventNext
 import ru.avem.standconfigurator.view.keyboardActionNext
-import ru.avem.standconfigurator.viewmodel.CurrentProjectViewModel
+import ru.avem.standconfigurator.viewmodel.DevicesViewModel
+import ru.avem.standconfigurator.viewmodel.ProjectViewModel
 
-class ProjectScreen(private val currentProject: Project) : Screen {
+class ProjectScreen(currentProject: Project) : Screen {
+    init {
+        ProjectModel.currentProject = currentProject
+    }
+
     @Composable
     override fun Content() {
         val localNavigator = LocalNavigator.currentOrThrow
@@ -60,171 +68,32 @@ class ProjectScreen(private val currentProject: Project) : Screen {
 
         val scaffoldState = rememberScaffoldState()
 
-        val currentProjectVM by remember { mutableStateOf(CurrentProjectViewModel(currentProject)) }
+        currentProjectVM = remember { mutableStateOf(ProjectViewModel(currentProject)) }
+        dvm = DevicesViewModel(currentProject.devices)
 
         var isProjectMenuExpanded by remember { mutableStateOf(false) }
         var isProtectionsMenuExpanded by remember { mutableStateOf(false) }
 
-        var isAddLogicDialogVisible by remember { mutableStateOf(false) }
         var isAddTestDialogVisible by remember { mutableStateOf(false) }
-
         var testName by remember { mutableStateOf(TextFieldValue("Опыт")) }
         var testsErrorState by remember { mutableStateOf(false) }
         var selectTestIdx by remember { mutableStateOf(0) }
         var isShowTestDropdownMenu by remember { mutableStateOf(false) }
 
+        var isEditLogicDialogVisible by remember { mutableStateOf(false) }
         val logicsScrollState = rememberReorderableLazyListState(onMove = { from, to ->
-            currentProjectVM.selectedTestLogics = currentProjectVM.selectedTestLogics.apply {
+            currentProjectVM.value.selectedTestLogics = currentProjectVM.value.selectedTestLogics.apply {
                 add(to.index, removeAt(from.index))
             }
         })
 
-        val logicTypes = listOf("Коммутация", "Регулировка", "Выжидание", "Защиты", "Комментарий")
-        var logicType by remember { mutableStateOf((logicTypes.first())) }
+        var selectedLogicIdx by remember { mutableStateOf(0) }
+        var isShowLogicsDropdownMenu by remember { mutableStateOf(false) }
+        var isNewLogic by remember { mutableStateOf(true) }
 
-        val selectedCommutationDevice = mutableStateOf<Device?>(null)
-        val selectedCommutationDevicePort = mutableStateOf("")
-        val selectedCommutationDevicePortOn = mutableStateOf(true)
-
-        var commentaryText by remember { mutableStateOf("") }
+        val logicItemValue by remember { mutableStateOf(LogicItem()) }
 
         val testsScrollState = rememberLazyListState()
-
-        @OptIn(ExperimentalMaterialApi::class)
-        @Composable
-        fun AddLogicDialog() {
-            AlertDialog(modifier = Modifier.width(600.dp).padding(16.dp),
-                onDismissRequest = { isAddLogicDialogVisible = false },
-                title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = buildAnnotatedString {
-                            withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
-                                append("З")
-                            }
-                            withStyle(style = SpanStyle(color = Color.Black)) {
-                                append("аполните поля")
-                            }
-                        }, fontSize = 30.sp)
-                    }
-                }, buttons = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Button(
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = {
-                                    val logicItemValue = when (logicType) {
-                                        "Коммутация" -> "[Коммутация] ${selectedCommutationDevice.value}->${selectedCommutationDevicePort.value} [${if (selectedCommutationDevicePortOn.value) "ВКЛ" else "ВЫКЛ"}]"
-                                        "Комментарий" -> "[Комментарий] $commentaryText"
-                                        else -> error("handle")
-                                    }
-
-                                    currentProjectVM.addLogic(LogicItem(logicItemValue))
-                                    scope.launch {
-                                        logicsScrollState.listState.scrollToItem(currentProjectVM.selectedTestLogics.size - 1)
-                                    }
-                                    isAddLogicDialogVisible = false
-                                }) {
-                                Text("Создать")
-                            }
-                        }
-                    }
-                }, text = {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            modifier = Modifier.height(4.dp),
-                            text = "",
-                        )
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            ComboBox(
-                                modifier = Modifier.fillMaxWidth(),
-                                initialValue = logicType,
-                                items = logicTypes,
-                                onDismissState = {},
-                                selectedValue = {
-                                    logicType = it
-                                }
-                            )
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column {
-                                when (logicType) {
-                                    "Коммутация" -> {
-                                        val commutationDevices = currentProject.devices.filter { it.mark == "DD" }
-                                        if (commutationDevices.isNotEmpty()) {
-                                            if (selectedCommutationDevice.value == null) {
-                                                selectedCommutationDevice.value = commutationDevices.first()
-                                            }
-                                            ComboBox(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                initialValue = selectedCommutationDevice.value,
-                                                items = commutationDevices,
-                                                onDismissState = {},
-                                                selectedValue = {
-                                                    selectedCommutationDevice.value = it
-                                                })
-                                            ComboBox(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                initialValue = selectedCommutationDevicePort.value,
-                                                items = selectedCommutationDevice.value?.params?.map { it.paramValue.store } ?: listOf(),
-                                                onDismissState = {},
-                                                selectedValue = {
-                                                    selectedCommutationDevicePort.value = it
-                                                }
-                                            )
-                                            ComboBox(
-                                                modifier = Modifier.fillMaxWidth(),
-                                                initialValue = "замкнуть",
-                                                items = listOf("замкнуть", "разомкнуть"),
-                                                onDismissState = {},
-                                                selectedValue = {
-                                                    selectedCommutationDevicePortOn.value = it == "замкнуть"
-                                                }
-                                            )
-                                        }
-                                    }
-                                    "Комментарий" -> {
-                                        OutlinedTextField(
-                                            singleLine = true,
-                                            value = commentaryText,
-                                            onValueChange = {
-                                                commentaryText = it
-                                            },
-                                            modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
-                                                keyEventNext(it, focusManager)
-                                            },
-                                            label = {
-                                                Text(text = "Введите комментарий")
-                                            },
-                                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                                            keyboardActions = keyboardActionNext(focusManager)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                })
-        }
 
         @OptIn(ExperimentalMaterialApi::class)
         @Composable
@@ -258,10 +127,10 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             Button(
                                 modifier = Modifier.fillMaxWidth(),
                                 onClick = {
-                                    currentProjectVM.addTest(Test(testName.text))
-                                    currentProjectVM.selectLast()
+                                    currentProjectVM.value.addTest(Test(testName.text))
+                                    currentProjectVM.value.selectLast()
                                     scope.launch {
-                                        testsScrollState.scrollToItem(currentProjectVM.selectedTestIdx)
+                                        testsScrollState.scrollToItem(currentProjectVM.value.selectedTestIdx)
                                     }
                                     isAddTestDialogVisible = false
                                 }) {
@@ -303,6 +172,58 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             )
                         }
                     }
+                })
+        }
+
+        @OptIn(ExperimentalMaterialApi::class)
+        @Composable
+        fun AddLogicDialog() {
+            AlertDialog(modifier = Modifier.width(600.dp).padding(16.dp),
+                onDismissRequest = { isEditLogicDialogVisible = false },
+                title = {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = buildAnnotatedString {
+                            withStyle(style = SpanStyle(color = MaterialTheme.colors.primary)) {
+                                append("З")
+                            }
+                            withStyle(style = SpanStyle(color = Color.Black)) {
+                                append("аполните поля")
+                            }
+                        }, fontSize = 30.sp)
+                    }
+                }, buttons = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Button(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    if (isNewLogic) {
+                                        currentProjectVM.value.addLogic(logicItemValue.copy())
+                                    } else {
+                                        currentProjectVM.value.editLogic(selectedLogicIdx, logicItemValue)
+                                        isNewLogic = true
+                                    }
+                                    scope.launch {
+                                        logicsScrollState.listState.scrollToItem(currentProjectVM.value.selectedTestLogics.size - 1)
+                                    }
+                                    isEditLogicDialogVisible = false
+                                }) {
+                                Text(if (isNewLogic) "Создать" else "Изменить")
+                            }
+                        }
+                    }
+                }, text = {
+                    LogicItemView(currentProject, logicItemValue)
                 })
         }
 
@@ -424,11 +345,11 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                 }
             }
         ) {
-            if (isAddLogicDialogVisible) {
-                AddLogicDialog()
-            }
             if (isAddTestDialogVisible) {
                 AddTestDialog()
+            }
+            if (isEditLogicDialogVisible) {
+                AddLogicDialog()
             }
 
             Row(modifier = Modifier.fillMaxWidth().padding(bottom = 56.dp)) {
@@ -436,18 +357,18 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                     LazyList(
                         modifier = Modifier.weight(.9f),
                         state = testsScrollState,
-                        items = currentProjectVM.tests,
-                        selectedItem = currentProjectVM.selectedTest.value,
+                        items = currentProjectVM.value.tests,
+                        selectedItem = currentProjectVM.value.selectedTest.value,
                         onNextListItem = {
                             if (it == selectTestIdx) {
                                 DropdownMenu(
                                     expanded = isShowTestDropdownMenu,
                                     onDismissRequest = { isShowTestDropdownMenu = false }) {
                                     DropdownMenuItem(onClick = {
-                                        currentProjectVM.removeAt(selectTestIdx)
+                                        currentProjectVM.value.removeAt(selectTestIdx)
                                         selectTestIdx = 0
-                                        currentProjectVM.clear()
-                                        currentProjectVM.selectFirst()
+                                        currentProjectVM.value.clear()
+                                        currentProjectVM.value.selectFirst()
                                         isShowTestDropdownMenu = false
                                     }) {
                                         Text("Удалить")
@@ -457,14 +378,20 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                         }
                     ) { it, isPrimary, _testIdx ->
                         selectTestIdx = _testIdx
-                        currentProjectVM.selectTest(it)
+                        currentProjectVM.value.selectTest(it)
                         isShowTestDropdownMenu = !isPrimary
                     }
 
-                    CardListItem(modifier = Modifier.clickable {
+                    Card(elevation = 4.dp, modifier = Modifier.clickable {
                         isAddTestDialogVisible = true
-                    }) {
-                        Text("Добавить опыт")
+                    }.padding(8.dp).height(52.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(8.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Добавить опыт")
+                        }
                     }
                 }
                 Column(modifier = Modifier.weight(.8f).padding(16.dp)) {
@@ -475,23 +402,54 @@ class ProjectScreen(private val currentProject: Project) : Screen {
                             .detectReorderAfterLongPress(logicsScrollState),
                         state = logicsScrollState.listState
                     ) {
-                        items(currentProjectVM.selectedTestLogics.size) {
-                            ReorderableItem(logicsScrollState, index = it, key = null) { isDragging ->
-                                val padding = animateDpAsState(if (isDragging) 16.dp else 0.dp)
-                                CardListItem(
-                                    modifier = Modifier
-                                        .padding(padding.value)
-                                        .hoverable(interactionSource = remember { MutableInteractionSource() })
-                                ) {
-                                    Text(currentProjectVM.selectedTestLogics[it].text)
+                        repeat(currentProjectVM.value.selectedTestLogics.size) {
+                            item() {
+                                ReorderableItem(logicsScrollState, index = it, key = null) { isDragging ->
+                                    val padding = animateDpAsState(if (isDragging) 16.dp else 0.dp)
+                                    CardListItem(
+                                        modifier = Modifier
+                                            .padding(padding.value)
+                                            .hoverable(interactionSource = remember { MutableInteractionSource() }),
+                                        item = currentProjectVM.value.selectedTestLogics[it],
+                                        selectedItem = currentProjectVM.value.selectedTestLogics[selectedLogicIdx],
+                                        onNextListItem = {
+                                            DropdownMenu(
+                                                expanded = isShowLogicsDropdownMenu,
+                                                onDismissRequest = { isShowLogicsDropdownMenu = false }) {
+                                                DropdownMenuItem(onClick = {
+                                                    isEditLogicDialogVisible = true
+                                                    isNewLogic = false
+                                                }) {
+                                                    Text("Редактировать")
+                                                }
+                                                DropdownMenuItem(onClick = {
+                                                    currentProjectVM.value.removeAtLogic(selectedLogicIdx)
+                                                    selectedLogicIdx = 0
+                                                    isShowLogicsDropdownMenu = false
+                                                }) {
+                                                    Text("Удалить")
+                                                }
+                                            }
+                                        },
+                                        onClick = { item, isPrimary ->
+                                            selectedLogicIdx = currentProjectVM.value.selectedTestLogics.indexOf(item)
+                                            isShowLogicsDropdownMenu = !isPrimary
+                                        }
+                                    )
                                 }
                             }
                         }
                     }
-                    CardListItem(modifier = Modifier.clickable {
-                        isAddLogicDialogVisible = true
-                    }) {
-                        Text("Добавить инструкцию")
+                    Card(elevation = 4.dp, modifier = Modifier.clickable {
+                        isEditLogicDialogVisible = true
+                    }.padding(8.dp).height(52.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(8.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Добавить инструкцию")
+                        }
                     }
                 }
             }

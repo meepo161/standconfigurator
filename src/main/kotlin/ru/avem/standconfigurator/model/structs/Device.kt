@@ -1,13 +1,16 @@
 package ru.avem.standconfigurator.model.structs
 import androidx.compose.runtime.mutableStateOf
-import ru.avem.standconfigurator.PairParam
+import ru.avem.standconfigurator.DeviceParam
+import ru.avem.standconfigurator.model.ProjectModel
+
+val properties = listOf("Коммутирующее?", "Регулирующее?", "Ус-во по которому можно регулироваться", "Ус-во по которому регулируемся")
 
 @kotlinx.serialization.Serializable
 open class Device(
     var mark: String = "",
     var address: Int = 0,
     var name: String,
-    var params: List<PairParam<ParamData, ParamValue>> = listOf(),
+    var params: List<DeviceParam> = listOf(),
 ) {
     fun clone(): Device {
         return Device(
@@ -15,7 +18,7 @@ open class Device(
             address = address,
             name = name,
             params = params.mapIndexed { i, it ->
-                PairParam(it.paramData.copy(), it.paramValue.clone(params[i].paramValue))
+                DeviceParam(it.paramData, it.paramValue.clone(params[i].paramValue))
             }
         )
     }
@@ -24,11 +27,11 @@ open class Device(
 }
 
 @kotlinx.serialization.Serializable
-enum class Type {
-    FIELD_STR,
-    FIELD_FLOAT,
-    FIELD_DOUBLE,
-    FIELD_INT,
+enum class FieldType {
+    STRING,
+    FLOAT,
+    DOUBLE,
+    INT,
     BOOL,
     ENUM,
     NONE
@@ -38,22 +41,24 @@ enum class Type {
 data class ParamData(
     val name: String= "",
     val unit: String= "",
-    val type: Type = Type.NONE
+    val fieldType: FieldType = FieldType.NONE,
+    val isIndicate: Boolean = false,
+    val stores: MutableList<String> = mutableListOf()
 )
 
 @kotlinx.serialization.Serializable
-data class ParamValue(var store: String = "", val stores: List<String> = listOf()) {
-    @kotlinx.serialization.Transient var valueState = mutableStateOf(store)
+data class ParamValue(private var store: String = "") {
+    @kotlinx.serialization.Transient var storeState = mutableStateOf(store)
 
     fun changeValue(_value: String) {
         store = _value
-        valueState.value = _value
+        storeState.value = _value
+        ProjectModel.refreshDevices() // TODO del
     }
 
     fun clone(old: ParamValue) = ParamValue(
         old.store,
-        old.stores.map { it }
     ).apply {
-        valueState = mutableStateOf(old.valueState.value)
+        storeState = mutableStateOf(old.storeState.value)
     }
 }

@@ -1,5 +1,7 @@
 package ru.avem.standconfigurator
 
+import ru.avem.standconfigurator.model.structs.ParamData
+import ru.avem.standconfigurator.model.structs.ParamValue
 import java.util.*
 import kotlin.math.abs
 
@@ -21,10 +23,8 @@ fun Double.autoformat(): String {
 
 fun Float.autoformat() = this.toDouble().autoformat()
 
-@kotlinx.serialization.Serializable
-data class PairParam<out A, out B>(
-    val paramData: A,
-    val paramValue: B
-) {
-    override fun toString(): String = "($paramData, $paramValue)"
-}
+@kotlinx.serialization.Serializable // TODO перенести в более подходящее место
+data class DeviceParam(
+    val paramData: ParamData,
+    val paramValue: ParamValue
+)

@@ -132,12 +132,9 @@ fun RowsAlertDialog(
                                         modifier = Modifier.fillMaxWidth().focusTarget().onPreviewKeyEvent {
                                             keyEventNext(it, focusManager)
                                         },
-                                        initialValue = dialogRowData.variableField.first(),
+                                        selectedItem = dialogRowData.field, // TODO check dialogRowData.variableField.first()
                                         items = dialogRowData.variableField,
-                                        onDismissState = {},
-                                        selectedValue = {
-                                            dialogRowData.field.value = it
-                                        }
+                                        onDismissState = {}
                                     )
                                 }
                             }

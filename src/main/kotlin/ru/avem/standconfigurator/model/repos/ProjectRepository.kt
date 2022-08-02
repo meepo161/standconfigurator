@@ -4,6 +4,7 @@ import ru.avem.standconfigurator.model.data.ProjectType
 import ru.avem.standconfigurator.model.structs.Project
 import ru.avem.standconfigurator.model.utils.loadFromJson
 import ru.avem.standconfigurator.model.utils.saveToJsonFile
+import java.nio.file.Files
 import java.nio.file.Paths
 
 object ProjectRepository {
@@ -29,6 +30,7 @@ object ProjectRepository {
     }
 
     fun init() {
+        Files.delete(Paths.get("projects.json")) // TODO del
         try {
             projects = loadFromJson(Paths.get("projects.json"))
         } catch (e: Exception) {

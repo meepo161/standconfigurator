@@ -15,47 +15,68 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun <T> ComboBox(
     modifier: Modifier = Modifier,
-    initialValue: T,
+    selectedItem: MutableState<T>,
     onDismissState: () -> Unit = {},
     items: List<T>,
-    selectedValue: (T) -> Unit,
+    selectedValue: (T) -> Unit = {},
     isEditable: Boolean = true
 ) {
     var expandedState by remember {
         mutableStateOf(false)
     }
-    var selectedItem by remember {
-        mutableStateOf(initialValue)
-    }
 
-    Column(modifier = modifier.border(1.dp, Color.Black).width(280.dp).height(56.dp)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth().clickable {
-                expandedState = true
-            }.fillMaxWidth().height(64.dp),
-        ) {
-            Text(selectedItem.toString(), modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.body1)
-            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-        }
-        if (isEditable) {
-            DropdownMenu(
-                expanded = expandedState,
-                onDismissRequest = {
-                    expandedState = false
-                    onDismissState()
-                }) {
-                items.forEach { item ->
-                    DropdownMenuItem(modifier = Modifier.fillMaxWidth().height(64.dp), onClick = {
-                        selectedItem = item
-                        selectedValue(item)
+//        if (!items.contains(selectedItem.value)) {
+//            val item = items.first()
+//            selectedItem.value = item
+//            selectedValue(item)
+//        }
+
+        Column(modifier = modifier.border(1.dp, Color.Black).width(280.dp).height(56.dp)) {
+            if (items.isNotEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().clickable {
+                        expandedState = true
+                    }.fillMaxWidth().height(64.dp),
+                ) {
+                    Text(
+                        selectedItem.value.toString(),
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.body1
+                    )
+                    Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+                }
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth().height(64.dp),
+                ) {
+                    TextField(
+                        modifier = modifier.width(280.dp).height(56.dp),
+                        value = "Нет элементов",
+                        isError = true,
+                        onValueChange = {})
+                }
+            }
+            if (isEditable) {
+                DropdownMenu(
+                    expanded = expandedState,
+                    onDismissRequest = {
                         expandedState = false
+                        onDismissState()
                     }) {
-                        Text(item.toString())
+                    items.forEach { item ->
+                        DropdownMenuItem(modifier = Modifier.fillMaxWidth().height(64.dp), onClick = {
+                            selectedItem.value = item
+                            selectedValue(item)
+                            expandedState = false
+                        }) {
+                            Text(item.toString())
+                        }
                     }
                 }
             }
         }
-    }
 }

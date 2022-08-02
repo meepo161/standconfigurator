@@ -197,7 +197,7 @@ class ProjectSelectorScreen : Screen {
                         },
                         contextMenuContent = {
                             DropdownMenuItem(onClick = {
-                                localNavigator.push(ProjectScreen(currentProject!!))
+                                localNavigator.push(ProjectScreen(currentProject!!)) // TODO check
                             }) {
                                 Text("Открыть")
                             }

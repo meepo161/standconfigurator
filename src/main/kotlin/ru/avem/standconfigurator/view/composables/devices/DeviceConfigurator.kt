@@ -1,4 +1,4 @@
-package ru.avem.standconfigurator.view.devices
+package ru.avem.standconfigurator.view.composables.devices
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
@@ -8,7 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.avem.standconfigurator.model.structs.Device
-import ru.avem.standconfigurator.model.structs.Type
+import ru.avem.standconfigurator.model.structs.FieldType
 import ru.avem.standconfigurator.view.composables.ComboBox
 
 @Composable
@@ -22,17 +22,23 @@ fun DeviceConfigurator(device: Device) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("${paramData.name}, ${paramData.unit}")
-                when (paramData.type) {
-                    Type.FIELD_STR -> TextField(
-                        value = paramValue.valueState.value,
+                Text(
+                    if (paramData.unit.isNotEmpty()) {
+                        "${paramData.name}, ${paramData.unit}"
+                    } else {
+                        "${paramData.name} "
+                    }
+                )
+                when (paramData.fieldType) {
+                    FieldType.STRING -> TextField(
+                        value = paramValue.storeState.value,
                         onValueChange = {
                             paramValue.changeValue(it)
                         },
                         maxLines = 1,
                     )
-                    Type.FIELD_FLOAT -> TextField(
-                        value = paramValue.valueState.value,
+                    FieldType.FLOAT -> TextField(
+                        value = paramValue.storeState.value,
                         onValueChange = {
                             if (it.toFloatOrNull() != null) {
                                 paramValue.changeValue(it)
@@ -40,8 +46,8 @@ fun DeviceConfigurator(device: Device) {
                         },
                         maxLines = 1,
                     )
-                    Type.FIELD_DOUBLE -> TextField(
-                        value = paramValue.valueState.value,
+                    FieldType.DOUBLE -> TextField(
+                        value = paramValue.storeState.value,
                         onValueChange = {
                             if (it.toDoubleOrNull() != null) {
                                 paramValue.changeValue(it)
@@ -49,8 +55,8 @@ fun DeviceConfigurator(device: Device) {
                         },
                         maxLines = 1,
                     )
-                    Type.FIELD_INT -> TextField(
-                        value = paramValue.valueState.value,
+                    FieldType.INT -> TextField(
+                        value = paramValue.storeState.value,
                         onValueChange = {
                             if (it.toIntOrNull() != null) {
                                 paramValue.changeValue(it.toInt().toString())
@@ -58,26 +64,24 @@ fun DeviceConfigurator(device: Device) {
                         },
                         maxLines = 1,
                     )
-                    Type.BOOL -> Switch(
-                        checked = paramValue.valueState.value.toBoolean(),
+                    FieldType.BOOL -> Switch(
+                        checked = paramValue.storeState.value.toBoolean(),
                         onCheckedChange = {
                             paramValue.changeValue(it.toString())
                         },
                         colors = SwitchDefaults.colors(
                             checkedThumbColor = MaterialTheme.colors.primary,
                             checkedTrackColor = MaterialTheme.colors.primary
-                        ),
-
                         )
-                    Type.ENUM -> ComboBox(
-                        initialValue = paramValue.valueState.value,
-                        items = paramValue.stores,
-                        selectedValue = {
-                            paramValue.changeValue(it)
-                        }
                     )
-                    Type.NONE -> error("Type.NONE")
-                    else -> error("")
+                    FieldType.ENUM -> ComboBox(
+                            selectedItem = paramValue.storeState,
+                            items = paramData.stores,
+                            selectedValue = {
+                                paramValue.changeValue(it)
+                            }
+                        )
+                    FieldType.NONE -> error("Type.NONE")
                 }
             }
         }

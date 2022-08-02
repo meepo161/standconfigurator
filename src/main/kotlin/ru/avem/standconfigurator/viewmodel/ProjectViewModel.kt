@@ -6,7 +6,7 @@ import ru.avem.standconfigurator.model.structs.LogicItem
 import ru.avem.standconfigurator.model.structs.Project
 import ru.avem.standconfigurator.model.structs.Test
 
-class CurrentProjectViewModel(private val currentProject: Project) {
+class ProjectViewModel(private val currentProject: Project) {
     var selectedTest = mutableStateOf(currentProject.tests.firstOrNull())
 
     var tests = mutableStateListOf(*currentProject.tests.toTypedArray())
@@ -53,8 +53,18 @@ class CurrentProjectViewModel(private val currentProject: Project) {
         selectedTest.value = tests.firstOrNull()
     }
 
+    fun removeAtLogic(logicIdx: Int) {
+        selectedTest.value?.logics?.removeAt(logicIdx)
+        selectedTestLogics.removeAt(logicIdx)
+    }
+
     fun clear() {
         selectedTest.value = tests.firstOrNull()
         selectedTestLogics.clear()
+    }
+
+    fun editLogic(logicItemIdx: Int, logicItem: LogicItem) {
+        selectedTest.value?.logics?.getOrNull(logicItemIdx)?.type = logicItem.type
+        selectedTestLogics.getOrNull(logicItemIdx)?.type = logicItem.type
     }
 }
