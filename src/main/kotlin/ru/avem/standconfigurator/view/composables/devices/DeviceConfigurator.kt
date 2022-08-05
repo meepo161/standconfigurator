@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ru.avem.standconfigurator.model.structs.Device
-import ru.avem.standconfigurator.model.structs.FieldType
+import ru.avem.standconfigurator.model.structs.device.Device
+import ru.avem.standconfigurator.model.structs.device.FieldType
 import ru.avem.standconfigurator.view.composables.ComboBox
 
 @Composable

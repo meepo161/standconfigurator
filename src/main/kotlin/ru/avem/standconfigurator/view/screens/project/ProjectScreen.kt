@@ -75,7 +75,7 @@ class ProjectScreen(currentProject: Project) : Screen {
         var isProtectionsMenuExpanded by remember { mutableStateOf(false) }
 
         var isAddTestDialogVisible by remember { mutableStateOf(false) }
-        var testName by remember { mutableStateOf(TextFieldValue("Опыт")) }
+        var testName by remember { mutableStateOf(TextFieldValue("")) }
         var testsErrorState by remember { mutableStateOf(false) }
         var selectTestIdx by remember { mutableStateOf(0) }
         var isShowTestDropdownMenu by remember { mutableStateOf(false) }
@@ -223,7 +223,7 @@ class ProjectScreen(currentProject: Project) : Screen {
                         }
                     }
                 }, text = {
-                    LogicItemView(currentProject, logicItemValue)
+                    LogicItemView(logicItemValue)
                 })
         }
 
@@ -258,7 +258,7 @@ class ProjectScreen(currentProject: Project) : Screen {
                                             message = "Успешно сохранено"
                                         )
                                     }
-                                }, modifier = Modifier.width(150.dp)) {
+                                }, modifier = Modifier.width(250.dp)) {
                                     Icon(imageVector = Icons.Default.Save, contentDescription = null)
                                     Spacer(modifier = Modifier.weight(1f))
                                     Text("Сохранить")
@@ -272,7 +272,7 @@ class ProjectScreen(currentProject: Project) : Screen {
                                             message = "Успешно сохранено"
                                         )
                                     }
-                                }, modifier = Modifier.width(150.dp)) {
+                                }, modifier = Modifier.width(250.dp)) {
                                     Icon(imageVector = Icons.Default.Save, contentDescription = null)
                                     Spacer(modifier = Modifier.weight(1f))
                                     Text("Сохранить как...")
@@ -280,7 +280,7 @@ class ProjectScreen(currentProject: Project) : Screen {
 
                                 DropdownMenuItem(onClick = {
                                     localNavigator.popUntilRoot()
-                                }) {
+                                }, modifier = Modifier.width(250.dp)) {
                                     Icon(imageVector = Icons.Default.Logout, contentDescription = null)
                                     Spacer(modifier = Modifier.weight(1f))
                                     Text("Сменить пользователя")
@@ -288,7 +288,7 @@ class ProjectScreen(currentProject: Project) : Screen {
 
                                 DropdownMenuItem(onClick = {
                                     MainModel.isOpen.value = false
-                                }) {
+                                }, modifier = Modifier.width(250.dp)) {
                                     Icon(imageVector = Icons.Default.ExitToApp, contentDescription = null)
                                     Spacer(modifier = Modifier.weight(1f))
                                     Text("Выход")
@@ -296,7 +296,7 @@ class ProjectScreen(currentProject: Project) : Screen {
                             }
 
                             Button(onClick = {
-                                localNavigator.push(DevicesScreen(currentProject))
+                                localNavigator.push(DevicesScreen())
                             }) {
                                 Text(text = "Приборы")
                             }
@@ -326,9 +326,15 @@ class ProjectScreen(currentProject: Project) : Screen {
                             }
 
                             Button(onClick = {
-//                                localNavigator.push(ViewConstructorScreen(currentProject)) TODO сделать экран конструктора представлений
+//                                localNavigator.push(ViewConstructorScreen()) TODO сделать экран конструктора представлений
                             }) {
                                 Text(text = "Конструктор представления")
+                            }
+
+                            Button(onClick = {
+//                                localNavigator.push(ProtocolConstructorScreen()) TODO сделать экран конструктора протокола
+                            }) {
+                                Text(text = "Конструктор протокола")
                             }
                         }
                     }

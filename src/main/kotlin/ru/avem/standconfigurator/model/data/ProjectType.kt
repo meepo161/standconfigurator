@@ -1,10 +1,10 @@
 package ru.avem.standconfigurator.model.data
 
-import ru.avem.standconfigurator.model.structs.Device
+import ru.avem.standconfigurator.model.structs.device.Device
 import ru.avem.standconfigurator.model.structs.Test
-import ru.avem.standconfigurator.model.structs.devices.AVEM4
-import ru.avem.standconfigurator.model.structs.devices.AvemATR
-import ru.avem.standconfigurator.model.structs.devices.PR
+import ru.avem.standconfigurator.model.structs.device.instancies.AVEM4
+import ru.avem.standconfigurator.model.structs.device.instancies.AvemATR
+import ru.avem.standconfigurator.model.structs.device.instancies.PR
 
 @kotlinx.serialization.Serializable
 sealed class ProjectType(var name: String, val initialTests: List<Test>, val initialDevices: List<Device>) {

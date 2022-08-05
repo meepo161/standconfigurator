@@ -16,6 +16,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import kotlinx.coroutines.launch
 import ru.avem.standconfigurator.model.MainModel
 import ru.avem.standconfigurator.model.ProjectModel
+import ru.avem.standconfigurator.model.ProjectModel.currentProject
 import ru.avem.standconfigurator.model.ProjectModel.dvm
 import ru.avem.standconfigurator.model.structs.Project
 import ru.avem.standconfigurator.view.composables.CardListItem
@@ -23,7 +24,7 @@ import ru.avem.standconfigurator.view.composables.LazyList
 import ru.avem.standconfigurator.view.composables.devices.DeviceConfigurator
 import ru.avem.standconfigurator.viewmodel.DevicesViewModel
 
-class DevicesScreen(private val currentProject: Project) : Screen {
+class DevicesScreen : Screen {
     @Composable
     override fun Content() {
         val localNavigator = LocalNavigator.currentOrThrow

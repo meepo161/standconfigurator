@@ -17,14 +17,13 @@ import androidx.compose.ui.unit.dp
 import ru.avem.standconfigurator.model.ProjectModel
 import ru.avem.standconfigurator.model.ProjectModel.findDeviceByName
 import ru.avem.standconfigurator.model.structs.LogicItem
-import ru.avem.standconfigurator.model.structs.Project
 import ru.avem.standconfigurator.model.structs.logicTypes
-import ru.avem.standconfigurator.model.structs.properties
+import ru.avem.standconfigurator.model.structs.device.deviceProperties
 import ru.avem.standconfigurator.view.keyEventNext
 import ru.avem.standconfigurator.view.keyboardActionNext
 
 @Composable
-fun LogicItemView(currentProject: Project, logicItem: LogicItem) {
+fun LogicItemView(logicItem: LogicItem) {
     val focusManager = LocalFocusManager.current
 
     val logicItemTypeState = remember { mutableStateOf(logicItem.type) }
@@ -72,9 +71,9 @@ fun LogicItemView(currentProject: Project, logicItem: LogicItem) {
         }
         Column {
             val commutationDevices =
-                ProjectModel.dvm.stateDevices.filter { it.params.any() { it.paramData.name == properties[0] && it.paramValue.storeState.value == "true" } }
+                ProjectModel.dvm.stateDevices.filter { it.params.any() { it.paramData.name == deviceProperties[0] && it.paramValue.storeState.value == "true" } }
             val regulationDevices =
-                ProjectModel.dvm.stateDevices.filter { it.params.any() { it.paramData.name == properties[1] && it.paramValue.storeState.value == "true" } }
+                ProjectModel.dvm.stateDevices.filter { it.params.any() { it.paramData.name == deviceProperties[1] && it.paramValue.storeState.value == "true" } }
 
             when (logicItemTypeState.value) {
                 "Коммутация" -> {

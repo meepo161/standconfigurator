@@ -1,5 +1,7 @@
 package ru.avem.standconfigurator.model.structs
 
+import ru.avem.standconfigurator.model.structs.device.Device
+
 @kotlinx.serialization.Serializable
 data class Project(
     var name: String = "",

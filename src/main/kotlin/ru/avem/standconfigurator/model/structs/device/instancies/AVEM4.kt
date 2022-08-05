@@ -1,21 +1,20 @@
-package ru.avem.standconfigurator.model.structs.devices
+package ru.avem.standconfigurator.model.structs.device.instancies
 
-import ru.avem.standconfigurator.DeviceParam
-import ru.avem.standconfigurator.model.structs.*
+import ru.avem.standconfigurator.model.structs.device.*
 
 class AVEM4 : Device(
     mark = "PV", address = 11, name = "АВЭМ-4",
     params = listOf(
         DeviceParam(
-            paramData = ParamData(name = properties[0], unit = "", fieldType = FieldType.BOOL),
+            paramData = ParamData(name = deviceProperties[0], unit = "", fieldType = FieldType.BOOL),
             paramValue = ParamValue("false")
         ),
         DeviceParam(
-            paramData = ParamData(name = properties[1], unit = "", fieldType = FieldType.BOOL),
+            paramData = ParamData(name = deviceProperties[1], unit = "", fieldType = FieldType.BOOL),
             paramValue = ParamValue("false")
         ),
         DeviceParam(
-            paramData = ParamData(name = properties[2], unit = "", fieldType = FieldType.BOOL),
+            paramData = ParamData(name = deviceProperties[2], unit = "", fieldType = FieldType.BOOL),
             paramValue = ParamValue("true")
         ),
         DeviceParam(

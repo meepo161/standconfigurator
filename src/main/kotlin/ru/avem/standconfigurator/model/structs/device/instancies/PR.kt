@@ -1,14 +1,13 @@
-package ru.avem.standconfigurator.model.structs.devices
+package ru.avem.standconfigurator.model.structs.device.instancies
 
-import ru.avem.standconfigurator.DeviceParam
-import ru.avem.standconfigurator.model.structs.*
+import ru.avem.standconfigurator.model.structs.device.*
 
 class PR : Device(
     mark = "DD", address = 2, name = "ПР",
     params = listOf(
-        DeviceParam(ParamData(properties[0], "", FieldType.BOOL), ParamValue("true")),
-        DeviceParam(ParamData(properties[1], "", FieldType.BOOL), ParamValue("false")),
-        DeviceParam(ParamData(properties[2], "", FieldType.BOOL), ParamValue("false")),
+        DeviceParam(ParamData(deviceProperties[0], "", FieldType.BOOL), ParamValue("true")),
+        DeviceParam(ParamData(deviceProperties[1], "", FieldType.BOOL), ParamValue("false")),
+        DeviceParam(ParamData(deviceProperties[2], "", FieldType.BOOL), ParamValue("false")),
         DeviceParam(ParamData("Дискретный выход 01 (DO_01)", "", FieldType.STRING), ParamValue("Дискретный выход 01 (DO_01)")),
         DeviceParam(ParamData("Дискретный выход 02 (DO_02)", "", FieldType.STRING), ParamValue("Дискретный выход 02 (DO_02)")),
         DeviceParam(ParamData("Дискретный выход 03 (DO_03)", "", FieldType.STRING), ParamValue("Дискретный выход 03 (DO_03)")),

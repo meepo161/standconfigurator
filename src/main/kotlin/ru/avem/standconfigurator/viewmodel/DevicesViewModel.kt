@@ -1,10 +1,9 @@
 package ru.avem.standconfigurator.viewmodel
 
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.remember
 import ru.avem.standconfigurator.model.MainModel
 import ru.avem.standconfigurator.model.ProjectModel
-import ru.avem.standconfigurator.model.structs.Device
+import ru.avem.standconfigurator.model.structs.device.Device
 
 class DevicesViewModel(private val devices: MutableList<Device>) {
     var stateDevices = mutableStateListOf(*devices.toTypedArray())
